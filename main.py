@@ -11,8 +11,7 @@ import logging
 import datetime
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), 
-								autoescape = True)
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
 # username is not Id because users might change their user name or email
 class Account(ndb.Model):
@@ -48,6 +47,23 @@ class Work(ndb.Model):
 	totalm = ndb.IntegerProperty()
 
 
+class RegisterUserHandler(webapp2.RequestHandler):
+	"Redirected to here from the login page. So always user is not None"
+	def get(self):
+		user = users.get_current_user()
+		if user:
+			user_id = user.user_id()
+			nickname = user.nickname()
+			email = user.email()
+			status = Account.my_get_or_insert(user_id, 
+				nickname = nickname, 
+				email = email)
+			# Login successful
+			self.redirect('/')			
+
+		else:
+			self.response.write('Access Denied')
+
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
 		self.response.out.write(*a, **kw)
@@ -63,11 +79,20 @@ class Handler(webapp2.RequestHandler):
 	
 
 class TimerHandler(Handler):
+	
 	def get(self):	
-		self.render('timer.html')		
-		#self.response.out.write(url)
+		user = users.get_current_user()
+		if user is None: 
+			self.redirect(users.create_login_url('/login'))
+			
+		else:
+			logout = users.create_logout_url('/')
+			self.render('timer.html',
+				user_name = user.nickname(), 
+				logout_url = logout)		
+
 
 app = webapp2.WSGIApplication([
-
-    ('/', TimerHandler)
+    ('/', TimerHandler),
+    ('/login', RegisterUserHandler)
 ], debug=True)
