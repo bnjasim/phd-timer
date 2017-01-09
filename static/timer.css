@@ -1,0 +1,38 @@
+
+a:hover{
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body{
+  font-family:  "Palatino Linotype", garamond, serif; /*georgia*/
+  font-size: 16px;
+  background-color: white; /* #fcfcfc */
+}
+
+
+.navbar-brand {
+  float: left;
+  height: 50px;
+  padding: 15px 0px;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.navbar-brand img {
+	width: 24px;
+	height: 24px;
+	display: inline-block;
+	margin-top: -3px;
+}
+
+.content {
+	margin-top: 10px;
+}
+
+.timer-div {
+	/*border: 1px solid rgba(200,200,200,0.9);*/
+	min-height: 50px;
+	
+	padding: 5px;
+}

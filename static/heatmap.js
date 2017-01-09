@@ -15,7 +15,7 @@ window.onload = function() {
                       .data(chartData)
                       .selector('#calendar-viz')
                       .tooltipEnabled(true)
-                      .colorRange(['#eee', '#45ab32'])
+                      .colorRange(['#eee', '#55ab42'])
                       .onClick(function (data) {
                         console.log('data', data);
                       });
