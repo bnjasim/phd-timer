@@ -75,11 +75,12 @@ body{
   -webkit-transition: opacity 0.6s;
   -moz-transition: opacity 0.6s;
 }
-.play:hover:before, .play:focus:before {
+.play:hover:before {
   transform: scale(1.1);
   -webkit-transform: scale(1.1);
   -moz-transform: scale(1.1);
 }
+
 .play.active {
   border-color: transparent;
 }
