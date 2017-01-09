@@ -3,6 +3,20 @@
 }, false); */
 
 window.onload = function() {
+	
+	// The play pause css button
+	var icon = d3.select('.play'); // the node
+	icon.on('click', function() {
+      //icon.toggleClass('active');
+	  if (icon.classed('active'))
+		  icon.attr('class', 'play');
+	  else
+		  icon.attr('class', 'play active');
+		
+      return false;
+     });
+	
+	// First rendering of the calendar heatmap
 	var now = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
       var chartData = d3.time.days(yearAgo, now).map(function (dateElement) {
