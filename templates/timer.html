@@ -2,10 +2,15 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> 
 
   <link rel="stylesheet" type="text/css" href="static/bootstrap.css"/>
   <link rel="stylesheet" type="text/css" href="static/blog_style.css"/>
+  <link rel="stylesheet" type="text/css" href="static/heatmap.css">
+
+  <script src="static/moment.js" charset="utf-8"></script>
+  <script src="static/d3.js" charset="utf-8"></script>
+  <script src="static/heatmap.js"></script>
+
   <title>PhD Timer</title>
 </head>
 
@@ -31,7 +36,8 @@
       <div class="col-md-2"> </div>
 
       <div class="col-md-10">
-
+        <div id="calendar-viz">
+        </div>
       </div>
 
       <div class="col-md-2"> </div>
