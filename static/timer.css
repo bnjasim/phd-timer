@@ -36,3 +36,62 @@ body{
 	
 	padding: 5px;
 }
+
+
+
+.play {
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 35px solid transparent;
+  border-bottom: 35px solid transparent;
+  border-left: 42px solid #2c3e50;
+  margin: 70px auto 35px auto;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  left: 7px;
+}
+.play:before {
+  content: '';
+  position: absolute;
+  top: -52.5px;
+  left: -80.5px;
+  bottom: -52.5px;
+  right: -24.5px;
+  border-radius: 50%;
+  border: 7px solid #2c3e50;
+  z-index: 2;
+  transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+}
+.play:after {
+  content: '';
+  opacity: 0;
+  transition: opacity 0.6s;
+  -webkit-transition: opacity 0.6s;
+  -moz-transition: opacity 0.6s;
+}
+.play:hover:before, .play:focus:before {
+  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  -moz-transform: scale(1.1);
+}
+.play.active {
+  border-color: transparent;
+}
+.play.active:after {
+  content: '';
+  opacity: 1;
+  width: 35px;
+  height: 56px;
+  background: #2c3e50;
+  position: absolute;
+  right: 3.5px;
+  top: -28px;
+  border-left: 14px solid #2c3e50;
+  box-shadow: inset 21px 0 0 0 #f9f9f9;
+}
