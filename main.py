@@ -9,6 +9,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 import logging
 import datetime
+import json
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
@@ -118,17 +119,22 @@ class TimerHandler(Handler):
 			# if starting to play, active will be true
 			if (active): 
 				# totalh and totalm should be discarded if played on a different day
+				totalh = 0
+				totalm = 0
 				if (work and work.date == ndb_date):
-					work = Work(active=active, starth=hour, startm=mins, date=ndb_date, totalh=work.totalh, totalm=work.totalm, id=user.user_id())
-					logging.error('Same day!')
-				else:
-					work = Work(active=active, date=ndb_date, totalh=0, totalm=0, starth=hour, startm=mins, id=user.user_id())	
-					logging.error('New day!')
+					totalh = work.totalh
+					totalm = work.totalm
+					
+				work = Work(active=active, starth=hour, startm=mins, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
 				work.put()
 
-			wKey = ndb.Key('Work', user.user_id())
-			work = wKey.get()
-			self.response.out.write('totalh = '+str(work.starth))
+				response_data = {"totalh":totalh, "totalm":totalm }
+			
+			else:
+				# clicked to pause
+				pass
+
+			self.response.out.write(json.dumps(response_data))	
 
 
 app = webapp2.WSGIApplication([

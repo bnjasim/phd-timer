@@ -19,6 +19,8 @@ window.onload = function() {
 		  var hour = now.hour();
 		  var mins = now.minute();
 		  var date = now.toJSON().substr(0,10); //2017-01-10 
+		  var totalh = 0;
+		  var totalm = 0;
 		  
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
@@ -31,8 +33,12 @@ window.onload = function() {
 				var DONE = 4; // readyState 4 means the request is done.
 				var OK = 200; // status 200 is a successful return.
 				if (xhr.readyState === DONE) {
-				  if (xhr.status === OK) 
-					  console.log('Response:'+xhr.responseText); // 'This is the returned text.'
+				  if (xhr.status === OK) {
+					  var response = JSON.parse(xhr.responseText);
+					  totalh = response.totalh;
+					  totalm = response.totalm;
+					  console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
+				  }
 				  else 
 					  console.log('Error: ' + xhr.status); // An error occurred during the request.
 				  
