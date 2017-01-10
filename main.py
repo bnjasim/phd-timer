@@ -128,7 +128,7 @@ class TimerHandler(Handler):
 				work = Work(active=active, starth=hour, startm=mins, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
 				work.put()
 
-				response_data = {"totalh":totalh, "totalm":totalm }
+				response_data = {"totalh":totalh, "totalm":totalm, "starth":hour, "startm":mins }
 			
 			else:
 				# clicked to pause

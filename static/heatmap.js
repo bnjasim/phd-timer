@@ -4,12 +4,15 @@
 
 window.onload = function() {
 	
+	var timer_id = 0; // for cancelling the setInterval
 	// The play pause css button
 	var icon = d3.select('.play'); // the node
 	icon.on('click', function() {
       //icon.toggleClass('active');
 	  if (icon.classed('active')) {
 		  icon.attr('class', 'play');
+		  
+		  
 	  } // end of if
 	  else {
 		  // Need to set as playing. Change icon to pause
@@ -21,6 +24,8 @@ window.onload = function() {
 		  var date = now.toJSON().substr(0,10); //2017-01-10 
 		  var totalh = 0;
 		  var totalm = 0;
+		  var starth = 0;
+		  var startm = 0;
 		  
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
@@ -37,7 +42,50 @@ window.onload = function() {
 					  var response = JSON.parse(xhr.responseText);
 					  totalh = response.totalh;
 					  totalm = response.totalm;
-					  console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
+					  starth = response.starth;
+					  startm = response.startm;
+					  // clear any existing time intervals
+					  // otherwise interesting effects of closure
+					  clearInterval(timer_id);
+					  
+					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
+					  // Set the display
+					  var am = 'AM';
+					  if (hour > 12) {
+						  hour = hour - 12;
+						  am = 'PM';
+					  }
+					  // format 5m to 05m
+					  var min_str = mins.toString();
+					  if (mins<10)
+						  min_str = '0'+mins;
+					  d3.select('#started-div')
+					  			.text('Started at '+hour+'.'+min_str+am);
+					  
+					  d3.select('#current-div')
+					  			.text('Current streak: 0h 0m');
+					  
+					  d3.select('#total-div')
+					  			.text('Total Today: '+totalh+'h '+totalm+'m');
+					  
+					  timer_id = setInterval(function(){
+						  now = moment();				  
+						  d3.select('#current-div')
+					  			.text('Current streak: '+(now.hour()-starth)+'h '+(now.minute()-startm)+'m');
+						  
+						  d3.select('#total-div')
+					  			.text('Total Today: '+(totalh+now.hour()-starth)+'h '+(totalm+now.minute()-startm)+'m');
+						  
+						  //console.log('now: '+now.minute());
+						  //console.log('startm: '+startm);
+						  
+					  }, 1000*60);	
+					  
+					  
+					  d3.select('#prev-div')
+					  			.text('Before this streak: '+totalh+'h '+totalm+'m');
+					  
+					  
 				  }
 				  else 
 					  console.log('Error: ' + xhr.status); // An error occurred during the request.
