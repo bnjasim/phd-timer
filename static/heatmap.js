@@ -18,10 +18,11 @@ window.onload = function() {
 		  var now = moment();
 		  var hour = now.hour();
 		  var mins = now.minute();
+		  var date = now.toJSON().substr(0,10); //2017-01-10 
 		  
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
-		  var params = '/?active='+true+'&hour='+hour+'&mins='+mins;
+		  var params = '/?date='+date+'&active='+true+'&hour='+hour+'&mins='+mins;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();

@@ -42,9 +42,11 @@ class Entry(ndb.Model):
 # Should have found other way! But keeping in client side or in memcache don't seem to be good
 class Work(ndb.Model):
 	active = ndb.BooleanProperty(default = False)
-	start = ndb.DateTimeProperty()
+	starth = ndb.IntegerProperty()
+	startm = ndb.IntegerProperty()
 	totalh = ndb.IntegerProperty()
 	totalm = ndb.IntegerProperty()
+	date = ndb.DateProperty()
 
 
 class RegisterUserHandler(webapp2.RequestHandler):
@@ -100,13 +102,23 @@ class TimerHandler(Handler):
 		else:
 			user = users.get_current_user()
 			user_ent_key = ndb.Key(Account, user.user_id())	
-			active = self.request.get('active')
-			hour = self.request.get('hour')
-			mins = self.request.get('mins')
+			active = bool(self.request.get('active'))
+			hour = int(self.request.get('hour'))
+			mins = int(self.request.get('mins'))
+			date = str(self.request.get('date')) # client date as string "2017-01-10". Server time Could be different
+			logging.error(date)
+			t = datetime.date.today() # datetime.date(2017, 1, 10)
+			ndb_date = t.replace(year = int(date[0:4]),
+								 month = int(date[5:7]),
+								 day = int(date[8:10]))
 			# logging.error("hour: "+hour+" mins: "+mins)
 			if (active):
-				
-			self.response.out.write('hours:'+hour)				
+				work = Work(active=active, starth=hour, startm=mins, date=ndb_date, id=user.user_id())
+				work.put()
+
+			wKey = ndb.Key('Work', user.user_id())
+			work = wKey.get()
+			self.response.out.write('totalh = '+str(work.starth))
 
 
 app = webapp2.WSGIApplication([
