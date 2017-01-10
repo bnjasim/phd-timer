@@ -39,9 +39,9 @@ class Entry(ndb.Model):
 	notes = ndb.TextProperty()
 
 # Only a single instance of this Entity type is required.
-# Should have found other way! But keeping in client side or in memcache don't appear good
+# Should have found other way! But keeping in client side or in memcache don't seem to be good
 class Work(ndb.Model):
-	isWorking = ndb.BooleanProperty(default = False)
+	active = ndb.BooleanProperty(default = False)
 	start = ndb.DateTimeProperty()
 	totalh = ndb.IntegerProperty()
 	totalm = ndb.IntegerProperty()
@@ -89,7 +89,24 @@ class TimerHandler(Handler):
 			logout = users.create_logout_url('/')
 			self.render('timer.html',
 				user_name = user.nickname(), 
-				logout_url = logout)		
+				logout_url = logout)	
+
+	def post(self):
+		
+		user = users.get_current_user()
+		if user is None: 
+			self.redirect(users.create_login_url('/login'))
+			
+		else:
+			user = users.get_current_user()
+			user_ent_key = ndb.Key(Account, user.user_id())	
+			active = self.request.get('active')
+			hour = self.request.get('hour')
+			mins = self.request.get('mins')
+			# logging.error("hour: "+hour+" mins: "+mins)
+			if (active):
+				
+			self.response.out.write('hours:'+hour)				
 
 
 app = webapp2.WSGIApplication([

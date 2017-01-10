@@ -8,14 +8,41 @@ window.onload = function() {
 	var icon = d3.select('.play'); // the node
 	icon.on('click', function() {
       //icon.toggleClass('active');
-	  if (icon.classed('active'))
+	  if (icon.classed('active')) {
 		  icon.attr('class', 'play');
-	  else
+	  } // end of if
+	  else {
+		  // Need to set as playing. Change icon to pause
 		  icon.attr('class', 'play active');
+		  
+		  var now = moment();
+		  var hour = now.hour();
+		  var mins = now.minute();
+		  
+		  // Ajax post request to set the start time and active status
+		  var xhr = new XMLHttpRequest();
+		  var params = '/?active='+true+'&hour='+hour+'&mins='+mins;
+		  //console.log(params);
+		  xhr.open('POST', params);
+		  xhr.send();
+		  
+		  xhr.onreadystatechange = function () {
+				var DONE = 4; // readyState 4 means the request is done.
+				var OK = 200; // status 200 is a successful return.
+				if (xhr.readyState === DONE) {
+				  if (xhr.status === OK) 
+					  console.log('Response:'+xhr.responseText); // 'This is the returned text.'
+				  else 
+					  console.log('Error: ' + xhr.status); // An error occurred during the request.
+				  
+				}
+		  };
+	  } // end of else
 		
       return false;
      });
 	
+
 	// First rendering of the calendar heatmap
 	var now = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
@@ -29,7 +56,7 @@ window.onload = function() {
                       .data(chartData)
                       .selector('#calendar-viz')
                       .tooltipEnabled(true)
-                      .colorRange(['#eee', '#55ab42'])
+                      .colorRange(['#eee', '#459b2a'])
                       .onClick(function (data) {
                         console.log('data', data);
                       });
@@ -37,6 +64,7 @@ window.onload = function() {
 }
 
 
+// calendar code
 function calendarHeatmap() {
   // defaults
   var width = 720;
