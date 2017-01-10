@@ -112,8 +112,18 @@ class TimerHandler(Handler):
 								 month = int(date[5:7]),
 								 day = int(date[8:10]))
 			# logging.error("hour: "+hour+" mins: "+mins)
-			if (active):
-				work = Work(active=active, starth=hour, startm=mins, date=ndb_date, id=user.user_id())
+			wKey = ndb.Key('Work', user.user_id())
+			work = wKey.get()
+
+			# if starting to play, active will be true
+			if (active): 
+				# totalh and totalm should be discarded if played on a different day
+				if (work and work.date == ndb_date):
+					work = Work(active=active, starth=hour, startm=mins, date=ndb_date, totalh=work.totalh, totalm=work.totalm, id=user.user_id())
+					logging.error('Same day!')
+				else:
+					work = Work(active=active, date=ndb_date, totalh=0, totalm=0, starth=hour, startm=mins, id=user.user_id())	
+					logging.error('New day!')
 				work.put()
 
 			wKey = ndb.Key('Work', user.user_id())
