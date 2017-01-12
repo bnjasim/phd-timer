@@ -40,39 +40,31 @@ window.onload = function() {
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
 					  var response = JSON.parse(xhr.responseText);
-					  var totalh = response.totalh;
+					  var totalh = response.totalh; // don't ever change these
 					  var totalm = response.totalm;
 					  var starth = response.starth;
 					  var startm = response.startm;
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
-					  var am = 'AM';
-					  if (nowh > 12) {
-						  nowh = nowh - 12;
-						  am = 'PM';
-					  }
-					  // format 5m to 05m
-					  var min_str = nowm.toString();
-					  if (nowm<10)
-						  min_str = '0'+nowm;
+					  
 					  d3.select('#started-div')
-					  			.text('Started at '+starth+'.'+min_str+am);
+					  			.text('Started at ' + (starth>12?starth-12:starth) + '.'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 					  
 					  d3.select('#current-div')
-					  			.text('Current streak: 0h 0m');
+					  			.text('Current streak: 0m');
 					  
 					  d3.select('#total-div')
-					  			.text('Total Today: '+totalh+'h '+totalm+'m');
+					  			.text('Total Today: ' + format_time_diff(totalh, totalm) );
 					  
 					  timer_id = setInterval(function(){
 						  now = moment();				  
-						  //now = now.add(1, 'minute');
+						  // now = now.add(1, 'minute');
 						  d3.select('#current-div')
-					  			.text('Current streak: '+(now.hour()-starth)+'h '+(now.minute()-startm)+'m');
+					  			.text('Current streak: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 						  
 						  d3.select('#total-div')
-					  			.text('Total Today: '+(totalh+now.hour()-starth)+'h '+(totalm+now.minute()-startm)+'m');
+					  			.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
 						  
 						  //console.log('now: '+now.minute());
 						  //console.log('startm: '+startm);
@@ -81,7 +73,7 @@ window.onload = function() {
 					  
 					  
 					  d3.select('#prev-div')
-					  			.text('Before this streak: '+totalh+'h '+totalm+'m');
+					  			.text('Before this streak: ' + format_time_diff(totalh, totalm) );
 					  
 					  
 				  }
@@ -118,6 +110,15 @@ window.onload = function() {
       heatmap();  // render the chart
 }
 
+// 1h-45m should be formatted as 15m
+function format_time_diff(h, m) {
+	if (m < 0) {
+		m = 60 + m;
+		h = h - 1;
+	}
+	
+	return (h>0 ? h+'h ' : '') + m+'m';
+}
 
 // calendar code
 function calendarHeatmap() {
