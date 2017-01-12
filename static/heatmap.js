@@ -10,8 +10,12 @@ window.onload = function() {
 	icon.on('click', function() {
       //icon.toggleClass('active');
 	  if (icon.classed('active')) {
+		  // Pausing. Set icon as play
 		  icon.attr('class', 'play');
-		  
+		  // clear any existing time intervals
+		  // otherwise interesting effects of closure
+		  clearInterval(timer_id);
+					  
 		  
 	  } // end of if
 	  else {
@@ -44,9 +48,6 @@ window.onload = function() {
 					  totalm = response.totalm;
 					  starth = response.starth;
 					  startm = response.startm;
-					  // clear any existing time intervals
-					  // otherwise interesting effects of closure
-					  clearInterval(timer_id);
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
@@ -70,6 +71,7 @@ window.onload = function() {
 					  
 					  timer_id = setInterval(function(){
 						  now = moment();				  
+						  //now = now.add(1, 'minute');
 						  d3.select('#current-div')
 					  			.text('Current streak: '+(now.hour()-starth)+'h '+(now.minute()-startm)+'m');
 						  
