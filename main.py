@@ -104,10 +104,10 @@ class TimerHandler(Handler):
 			user = users.get_current_user()
 			user_ent_key = ndb.Key(Account, user.user_id())	
 			active = bool(self.request.get('active'))
-			hour = int(self.request.get('hour'))
-			mins = int(self.request.get('mins'))
+			starth = int(self.request.get('nowh'))
+			startm = int(self.request.get('nowm'))
 			date = str(self.request.get('date')) # client date as string "2017-01-10". Server time Could be different
-			logging.error(date)
+			#logging.error(date)
 			t = datetime.date.today() # datetime.date(2017, 1, 10)
 			ndb_date = t.replace(year = int(date[0:4]),
 								 month = int(date[5:7]),
@@ -125,10 +125,10 @@ class TimerHandler(Handler):
 					totalh = work.totalh
 					totalm = work.totalm
 					
-				work = Work(active=active, starth=hour, startm=mins, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
+				work = Work(active=active, starth=starth, startm=startm, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
 				work.put()
 
-				response_data = {"totalh":totalh, "totalm":totalm, "starth":hour, "startm":mins }
+				response_data = {"totalh":totalh, "totalm":totalm, "starth":starth, "startm":startm }
 			
 			else:
 				# clicked to pause

@@ -23,17 +23,13 @@ window.onload = function() {
 		  icon.attr('class', 'play active');
 		  
 		  var now = moment();
-		  var hour = now.hour();
-		  var mins = now.minute();
+		  var nowh = now.hour();
+		  var nowm = now.minute();
 		  var date = now.toJSON().substr(0,10); //2017-01-10 
-		  var totalh = 0;
-		  var totalm = 0;
-		  var starth = 0;
-		  var startm = 0;
-		  
+		 
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
-		  var params = '/?date='+date+'&active='+true+'&hour='+hour+'&mins='+mins;
+		  var params = '/?date='+date+'&active='+true+'&nowh='+nowh+'&nowm='+nowm;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
@@ -44,24 +40,24 @@ window.onload = function() {
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
 					  var response = JSON.parse(xhr.responseText);
-					  totalh = response.totalh;
-					  totalm = response.totalm;
-					  starth = response.starth;
-					  startm = response.startm;
+					  var totalh = response.totalh;
+					  var totalm = response.totalm;
+					  var starth = response.starth;
+					  var startm = response.startm;
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
 					  var am = 'AM';
-					  if (hour > 12) {
-						  hour = hour - 12;
+					  if (nowh > 12) {
+						  nowh = nowh - 12;
 						  am = 'PM';
 					  }
 					  // format 5m to 05m
-					  var min_str = mins.toString();
-					  if (mins<10)
-						  min_str = '0'+mins;
+					  var min_str = nowm.toString();
+					  if (nowm<10)
+						  min_str = '0'+nowm;
 					  d3.select('#started-div')
-					  			.text('Started at '+hour+'.'+min_str+am);
+					  			.text('Started at '+starth+'.'+min_str+am);
 					  
 					  d3.select('#current-div')
 					  			.text('Current streak: 0h 0m');
@@ -90,7 +86,9 @@ window.onload = function() {
 					  
 				  }
 				  else 
-					  console.log('Error: ' + xhr.status); // An error occurred during the request.
+					  d3.select('#started-div')
+						  		.style('color', 'red')
+					  			.text('Error! Connection Failed. Please Retry');
 				  
 				}
 		  };
