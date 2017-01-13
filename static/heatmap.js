@@ -134,6 +134,8 @@ window.onload = function() {
 		  totalh = totalh + now.hour() - starth;
 		  totalm = totalm + now.minute() - startm;
 		  
+		  // TODO: normalize the total. Avoid negative in totalm
+		  
 		  // Show the commit button
 		  var commit_button = d3.select('#commit-button');
 		  commit_button.attr('disabled', null);
@@ -142,13 +144,12 @@ window.onload = function() {
 		  d3.select('#total-edit')
 		  			.attr('class', null);
 		  
-		  
 		  // When commit button is clicked
 		  commit_button.on('click', function() {
 			  // Ajax Post request
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
-		  	  var params = '/?date='+date+'&active='+false+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  	  var params = '/?date='+date+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
 		  	  //console.log(params);
 			  xhr.open('POST', params);
 			  xhr.send();
@@ -158,7 +159,7 @@ window.onload = function() {
 					var OK = 200; // status 200 is a successful return.
 					if (xhr.readyState === DONE) {
 					  if (xhr.status === OK) {
-						  var response = JSON.parse(xhr.responseText);
+						  // var response = JSON.parse(xhr.responseText); // no response from server
 					  }
 					  else 
 						  d3.select('#started-div')
@@ -190,7 +191,7 @@ window.onload = function() {
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
 		  // we send total time as well which will be available when the page is loaded
-		  var params = '/?date='+date+'&active='+true+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
+		  var params = '/?date='+date+'&active='+1+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
@@ -200,11 +201,11 @@ window.onload = function() {
 				var OK = 200; // status 200 is a successful return.
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
-					  var response = JSON.parse(xhr.responseText);
-					  totalh = response.totalh; // don't ever change these
-					  totalm = response.totalm;
-					  starth = response.starth; // duplicate of nowh - but ok!
-					  startm = response.startm; // duplicate of nowm - but ok! we may change nowm
+					  // var response = JSON.parse(xhr.responseText); // No response from server for POST
+					  // totalh = response.totalh; // don't ever change these
+					  // totalm = response.totalm;
+					  starth = now.hour(); //response.starth; // duplicate of nowh - but ok!
+					  startm = now.minute();//response.startm; // duplicate of nowm - but ok! we may change nowm
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display

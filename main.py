@@ -106,13 +106,13 @@ class TimerHandler(Handler):
 
 			# The server logic is very simple. 
 			# All the heavy lifting like "splitting work crossing 12AM" is left to the client
-			active = bool(self.request.get('active'))
+			active = bool(int(self.request.get('active'))) # if active = 0, bool() gives True
 			date = str(self.request.get('date')) # client date as string "2017-01-10". Server time Could be different
 			totalh = int(self.request.get('totalh'))
 			totalm = int(self.request.get('totalm'))
 			starth = int(self.request.get('starth'))
 			startm = int(self.request.get('startm'))
-			#logging.error(date)
+			logging.error('***Active**** = '+ str(self.request.get('active')))
 			t = datetime.date.today() # datetime.date(2017, 1, 10)
 			ndb_date = t.replace(year = int(date[0:4]),
 								 month = int(date[5:7]),
