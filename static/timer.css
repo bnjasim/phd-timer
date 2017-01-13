@@ -55,12 +55,30 @@ body{
 }
 
 #current-div {
-	margin-top: 54px;
+	margin-top: 34px;
+	min-height: 30px;
+}
+
+#current-div div {
+	display: inline;
+}
+
+#current-edit {
+	font-size: 12px;
+	font-family: sans-serif;
+	margin-left: 10px;
+}
+
+.disabled {
+	/*pointer-events: none;
+	cursor: default;
+	opacity: 0.6;*/
+	visibility: hidden;
 }
 
 #commit-button {
 	margin-top: 10px;
-	visibility: hidden;
+	
 }
 
 

@@ -20,9 +20,11 @@ window.onload = function() {
 		  
 		  // Show the commit button
 		  d3.select('#commit-button')
-		  			.style('visibility', 'visible');
+		  			.attr('disabled', null);
 		  
-		  
+		  // Show the edit current streak option
+		  d3.select('#current-edit')
+		  			.attr('class', null);
 					  
 		  
 	  } // end of if
@@ -32,7 +34,11 @@ window.onload = function() {
 		  
 		  // hide the commit button
 		  d3.select('#commit-button')
-		  			.style('visibility', 'hidden');
+		  			.attr('disabled', 'disabled');
+		  
+		  // hide the edit current streak option
+		  d3.select('#current-edit')
+		  			.attr('class', 'disabled');
 		  
 		  var now = moment();
 		  var nowh = now.hour();
@@ -64,7 +70,8 @@ window.onload = function() {
 					  			.text('Started at ' + (starth>12?starth-12:starth) + '.'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 					  
 					  d3.select('#current-div')
-					  			.text('Current streak: 0m');
+					  			.select('div')
+					  			.text('Current: 0m');
 					  
 					  d3.select('#total-div')
 					  			.text('Total Today: ' + format_time_diff(totalh, totalm) );
@@ -85,7 +92,7 @@ window.onload = function() {
 					  
 					  
 					  d3.select('#prev-div')
-					  			.text('Before this streak: ' + format_time_diff(totalh, totalm) );
+					  			.text('Before this: ' + format_time_diff(totalh, totalm) );
 					  
 					  
 				  }
