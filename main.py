@@ -112,7 +112,7 @@ class TimerHandler(Handler):
 			totalm = int(self.request.get('totalm'))
 			starth = int(self.request.get('starth'))
 			startm = int(self.request.get('startm'))
-			logging.error('***Active**** = '+ str(self.request.get('active')))
+			# logging.error('***Active**** = '+ str(self.request.get('active')))
 			t = datetime.date.today() # datetime.date(2017, 1, 10)
 			ndb_date = t.replace(year = int(date[0:4]),
 								 month = int(date[5:7]),
@@ -146,8 +146,9 @@ class AjaxHandler(Handler):
 				response_data = {"active":False}
 			else:
 				# date is not JSON serializable. Just convert it to a string
+				# There is a problem if we get 2017-1-13. We instead need 2017-01-13
 				date = work.date
-				date_str = str(date.year) + '-' + str(date.month) + '-' + str(date.day)
+				date_str = str(date.year) + '-' + ('0'+str(date.month) if date.month < 10 else str(date.month)) + '-' + ('0'+str(date.day) if date.day < 10 else str(date.day))
 
 				response_data = {"active":work.active, "date":date_str, "totalh":work.totalh, "totalm":work.totalm, "starth":work.starth, "startm":work.startm}
 			

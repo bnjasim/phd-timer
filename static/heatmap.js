@@ -93,6 +93,7 @@ window.onload = function() {
 				  startm = response.startm;
 				  var start_date = response.date;
 				  
+				  console.log('date='+date+' start date='+start_date);
 				  // If same date, good to go! Just change the icon to pause, set start time, compute streak etc.
 				  if (start_date === date) {
 					  // Change icon to pause. We are playing now!
