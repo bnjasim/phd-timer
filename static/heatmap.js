@@ -4,28 +4,35 @@
 
 window.onload = function() {
 	
-	var totalh; // don't ever change these
-    var totalm;
-    var starth; // duplicate of nowh - but ok!
-    var startm;
+	var totalh = 0; // don't ever change these
+    var totalm = 0;
+    var starth = 0; // duplicate of nowh - but ok!
+    var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
 	// The play pause css button
 	var icon = d3.select('.play'); // the node
+	
 	icon.on('click', function() {
       //icon.toggleClass('active');
 	  
 	  if (icon.classed('active')) {
-		  // Pausing. Set icon as play
+		  // clicked to pause. Set icon as play
 		  icon.attr('class', 'play');
 		  
 		  // clear any existing time intervals
 		  // otherwise interesting effects of closure
 		  clearInterval(timer_id);
 		  
+		  // Paused/Stopped. So compute the totalh and totalm now!
+		  var now = moment();
+		  var date = now.toJSON().substr(0,10); //2017-01-13 
+		  totalh = totalh + now.hour() - starth;
+		  totalm = totalm + now.minute() - startm;
+		  
 		  // Show the commit button
-		  d3.select('#commit-button')
-		  			.attr('disabled', null);
+		  var commit_button = d3.select('#commit-button');
+		  commit_button.attr('disabled', null);
 		  
 		  // Show the edit total streak option
 		  d3.select('#total-edit')
@@ -33,14 +40,36 @@ window.onload = function() {
 		  
 		  
 		  // When commit button is clicked
-		  d3.select('#commit-button').on('click', function() {
-			  console.log(nowm)
-		  })
+		  commit_button.on('click', function() {
+			  // Ajax Post request
+			  var xhr = new XMLHttpRequest();
+			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
+		  	  var params = '/?date='+date+'&active='+false+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  	  //console.log(params);
+			  xhr.open('POST', params);
+			  xhr.send();
+
+			  xhr.onreadystatechange = function () {
+					var DONE = 4; // readyState 4 means the request is done.
+					var OK = 200; // status 200 is a successful return.
+					if (xhr.readyState === DONE) {
+					  if (xhr.status === OK) {
+						  var response = JSON.parse(xhr.responseText);
+					  }
+					  else 
+						  d3.select('#started-div')
+									.style('color', 'red')
+									.text('Error! Connection Failed. Please Retry');
+
+					}
+			  };	  
+
+		  }); // end of commit button submit
 					  
 		  
 	  } 
 	  else {
-		  // Need to set as playing. Change icon to pause
+		  // clicked to play. Change icon to pause
 		  icon.attr('class', 'play active');
 		  
 		  // hide the commit button
@@ -52,13 +81,12 @@ window.onload = function() {
 		  			.attr('class', 'disabled');
 		  
 		  var now = moment();
-		  var nowh = now.hour();
-		  var nowm = now.minute();
 		  var date = now.toJSON().substr(0,10); //2017-01-10 
 		 
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
-		  var params = '/?date='+date+'&active='+true+'&nowh='+nowh+'&nowm='+nowm;
+		  // we send total time as well which will be available when the page is loaded
+		  var params = '/?date='+date+'&active='+true+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
@@ -103,7 +131,7 @@ window.onload = function() {
 					  
 					  
 					  d3.select('#prev-div')
-					  			.text('Before this Session: ' + format_time_diff(totalh, totalm) );
+					  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
 					  
 					  
 				  }

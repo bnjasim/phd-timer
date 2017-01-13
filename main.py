@@ -103,38 +103,29 @@ class TimerHandler(Handler):
 		else:
 			user = users.get_current_user()
 			user_ent_key = ndb.Key(Account, user.user_id())	
+
+			# The server logic is very simple. 
+			# All the heavy lifting like "splitting work crossing 12AM" is left to the client
 			active = bool(self.request.get('active'))
-			starth = int(self.request.get('nowh'))
-			startm = int(self.request.get('nowm'))
 			date = str(self.request.get('date')) # client date as string "2017-01-10". Server time Could be different
+			totalh = int(self.request.get('totalh'))
+			totalm = int(self.request.get('totalm'))
+			starth = int(self.request.get('starth'))
+			startm = int(self.request.get('startm'))
 			#logging.error(date)
 			t = datetime.date.today() # datetime.date(2017, 1, 10)
 			ndb_date = t.replace(year = int(date[0:4]),
 								 month = int(date[5:7]),
 								 day = int(date[8:10]))
-			# logging.error("hour: "+hour+" mins: "+mins)
-			wKey = ndb.Key('Work', user.user_id())
-			work = wKey.get()
-
-			# if starting to play, active will be true
-			if (active): 
-				# totalh and totalm should be discarded if played on a different day
-				totalh = 0
-				totalm = 0
-				if (work and work.date == ndb_date):
-					totalh = work.totalh
-					totalm = work.totalm
-					
-				work = Work(active=active, starth=starth, startm=startm, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
-				work.put()
-
-				response_data = {"totalh":totalh, "totalm":totalm, "starth":starth, "startm":startm }
+			# To read work using key
+			# wKey = ndb.Key('Work', user.user_id())
+			# work = wKey.get()
+			work = Work(active=active, starth=starth, startm=startm, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
+			work.put()
 			
-			else:
-				# clicked to pause
-				pass
-
-			self.response.out.write(json.dumps(response_data))	
+			# No response is required!!!
+			# response_data = {"totalh":totalh, "totalm":totalm, "starth":starth, "startm":startm }
+			# self.response.out.write(json.dumps(response_data))	
 
 
 app = webapp2.WSGIApplication([
