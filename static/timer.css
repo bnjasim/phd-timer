@@ -30,6 +30,16 @@ body{
 	margin-top: 10px;
 }
 
+#enclose-div {
+	width: 768px;
+	border: 1px solid rgba(200,200,200,0.9);
+	overflow: hidden;
+	margin-bottom: 30px;
+	margin-top: 40px;
+	padding: 30px;
+	padding-top: 10px;
+}
+
 .timer-div {
 	/*border: 1px solid rgba(200,200,200,0.9);*/
 	min-height: 50px;
