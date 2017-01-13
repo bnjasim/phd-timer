@@ -9,6 +9,30 @@ window.onload = function() {
     var starth = 0; // duplicate of nowh - but ok!
     var startm = 0;
 	
+	// Send an AJAX GET request for the state of the timer
+	var xhr = new XMLHttpRequest();
+	var params = '/ajax';
+	xhr.open('GET', params);
+	xhr.send();
+	
+	xhr.onreadystatechange = function () {
+		var DONE = 4; // readyState 4 means the request is done.
+		var OK = 200; // status 200 is a successful return.
+		if (xhr.readyState === DONE) {
+		  if (xhr.status === OK) {
+			  //console.log(xhr.responseText)
+			  var response = JSON.parse(xhr.responseText);
+			  
+			  // Can be quite complicated!
+		  }
+		  else 
+			  d3.select('#started-div')
+						.style('color', 'red')
+						.text('Error! Connection Failed. Please Reload');
+
+		}
+	  };	// End of Ajax GET request  
+
 	var timer_id = 0; // for cancelling the setInterval
 	// The play pause css button
 	var icon = d3.select('.play'); // the node

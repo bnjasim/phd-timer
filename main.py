@@ -127,8 +127,30 @@ class TimerHandler(Handler):
 			# response_data = {"totalh":totalh, "totalm":totalm, "starth":starth, "startm":startm }
 			# self.response.out.write(json.dumps(response_data))	
 
+class AjaxHandler(Handler):
+
+	def get(self):	
+		user = users.get_current_user()
+		if user is None: 
+			self.redirect(users.create_login_url('/login'))
+			
+		else:
+			logout = users.create_logout_url('/')
+			user_ent_key = ndb.Key(Account, user.user_id())	
+			# To read work using key
+			wKey = ndb.Key('Work', user.user_id()) # id is given
+			work = wKey.get()
+
+			# date is not JSON serializable. Just convert it to a string
+			date = work.date
+			date_str = str(date.year) + '-' + str(date.month) + '-' + str(date.day)
+
+			response_data = {"active":work.active, "date":date_str, "totalh":work.totalh, "totalm":work.totalm, "starth":work.starth, "startm":work.startm}
+			self.response.out.write(json.dumps(response_data))
+
 
 app = webapp2.WSGIApplication([
     ('/', TimerHandler),
+    ('/ajax', AjaxHandler),
     ('/login', RegisterUserHandler)
 ], debug=True)
