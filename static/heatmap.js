@@ -4,6 +4,11 @@
 
 window.onload = function() {
 	
+	var totalh; // don't ever change these
+    var totalm;
+    var starth; // duplicate of nowh - but ok!
+    var startm;
+	
 	var timer_id = 0; // for cancelling the setInterval
 	// The play pause css button
 	var icon = d3.select('.play'); // the node
@@ -22,12 +27,18 @@ window.onload = function() {
 		  d3.select('#commit-button')
 		  			.attr('disabled', null);
 		  
-		  // Show the edit current streak option
-		  d3.select('#current-edit')
+		  // Show the edit total streak option
+		  d3.select('#total-edit')
 		  			.attr('class', null);
+		  
+		  
+		  // When commit button is clicked
+		  d3.select('#commit-button').on('click', function() {
+			  console.log(nowm)
+		  })
 					  
 		  
-	  } // end of if
+	  } 
 	  else {
 		  // Need to set as playing. Change icon to pause
 		  icon.attr('class', 'play active');
@@ -36,8 +47,8 @@ window.onload = function() {
 		  d3.select('#commit-button')
 		  			.attr('disabled', 'disabled');
 		  
-		  // hide the edit current streak option
-		  d3.select('#current-edit')
+		  // hide the edit total streak option
+		  d3.select('#total-edit')
 		  			.attr('class', 'disabled');
 		  
 		  var now = moment();
@@ -58,41 +69,41 @@ window.onload = function() {
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
 					  var response = JSON.parse(xhr.responseText);
-					  var totalh = response.totalh; // don't ever change these
-					  var totalm = response.totalm;
-					  var starth = response.starth;
-					  var startm = response.startm;
+					  totalh = response.totalh; // don't ever change these
+					  totalm = response.totalm;
+					  starth = response.starth; // duplicate of nowh - but ok!
+					  startm = response.startm; // duplicate of nowm - but ok! we may change nowm
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
+					  var current_div = d3.select('#current-div');
+					  
+					  var total_div = d3.select('#total-div')
+					  			.select('div');
 					  
 					  d3.select('#started-div')
 					  			.text('Started at ' + (starth>12?starth-12:starth) + '.'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 					  
-					  d3.select('#current-div')
-					  			.select('div')
-					  			.text('Current: 0m');
+					  current_div.text('Current Session: 0m');
 					  
-					  d3.select('#total-div')
-					  			.text('Total Today: ' + format_time_diff(totalh, totalm) );
+					  
+					  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 					  
 					  timer_id = setInterval(function(){
-						  now = moment();				  
-						  // now = now.add(1, 'minute');
-						  d3.select('#current-div')
-					  			.text('Current streak: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
+						  //now = moment();				  
+						  now = now.add(1, 'minute');
+						  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 						  
-						  d3.select('#total-div')
-					  			.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
+						  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
 						  
 						  //console.log('now: '+now.minute());
 						  //console.log('startm: '+startm);
 						  
-					  }, 1000*60);	
+					  }, 1000*1);	
 					  
 					  
 					  d3.select('#prev-div')
-					  			.text('Before this: ' + format_time_diff(totalh, totalm) );
+					  			.text('Before this Session: ' + format_time_diff(totalh, totalm) );
 					  
 					  
 				  }
