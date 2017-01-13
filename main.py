@@ -141,11 +141,16 @@ class AjaxHandler(Handler):
 			wKey = ndb.Key('Work', user.user_id()) # id is given
 			work = wKey.get()
 
-			# date is not JSON serializable. Just convert it to a string
-			date = work.date
-			date_str = str(date.year) + '-' + str(date.month) + '-' + str(date.day)
+			if (work is None):
+				# First time creation
+				response_data = {"active":False}
+			else:
+				# date is not JSON serializable. Just convert it to a string
+				date = work.date
+				date_str = str(date.year) + '-' + str(date.month) + '-' + str(date.day)
 
-			response_data = {"active":work.active, "date":date_str, "totalh":work.totalh, "totalm":work.totalm, "starth":work.starth, "startm":work.startm}
+				response_data = {"active":work.active, "date":date_str, "totalh":work.totalh, "totalm":work.totalm, "starth":work.starth, "startm":work.startm}
+			
 			self.response.out.write(json.dumps(response_data))
 
 

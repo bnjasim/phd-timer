@@ -9,12 +9,23 @@ window.onload = function() {
     var starth = 0; // duplicate of nowh - but ok!
     var startm = 0;
 	
+	var timer_id = 0; // for cancelling the setInterval
+	var time_set_interval = 1; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	// The play pause css button
+	var icon = d3.select('.play');
+	
+	var current_div = d3.select('#current-div');
+					  
+	var total_div = d3.select('#total-div')
+				.select('div'); // there is an edit link inside total-div
+	
 	// Send an AJAX GET request for the state of the timer
 	var xhr = new XMLHttpRequest();
 	var params = '/ajax';
 	xhr.open('GET', params);
 	xhr.send();
 	
+	// Ajax Get request for initial timer data load
 	xhr.onreadystatechange = function () {
 		var DONE = 4; // readyState 4 means the request is done.
 		var OK = 200; // status 200 is a successful return.
@@ -22,20 +33,79 @@ window.onload = function() {
 		  if (xhr.status === OK) {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
+			  var now = moment();
+		  	  var date = now.toJSON().substr(0,10); //2017-01-13 
 			  
-			  // Can be quite complicated!
+			  // if previous state was not playing, it is easy
+			  console.log(response);
+			  if (!response.active) {
+				  // no need to change the play icon
+				  
+				  // Only consider total work of today. Not someday's before
+				  // If first time access and work doesn't exist in server, date field will be null
+				  if (response.date && date === response.date) {
+				    totalh = response.totalh;
+				    totalm = response.totalm;
+				  }  
+				  
+				  d3.select('#started-div')
+				  			.text('Click to Start');
+				  
+				  current_div.text('Current Session: --:--')
+				  
+				  d3.select('#prev-div')
+				  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+				  
+				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
+			  }
+			  
+			  else {
+			  // If previous state was playing, reset anyhow.
+			      starth = response.starth;
+				  startm = response.startm;
+				  var start_date = response.date;
+				  
+				  // If same date, good to go! Just change the icon to pause, set start time, compute streak etc.
+				  if (start_date === date) {
+					  // Change icon to pause. We are playing now!
+		  			  icon.attr('class', 'play active');
+					  
+					  totalh = response.totalh;
+				      totalm = response.totalm;
+					  
+					  d3.select('#started-div')
+					  			.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
+					  
+					  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
+					  
+					  timer_id = setInterval(function(){
+						  //now = moment();				  
+						  now = now.add(1, 'minute');
+						  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
+						  
+						  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
+						  
+						  //console.log('now: '+now.minute());
+						  //console.log('startm: '+startm);
+						  
+					  }, 1000*time_set_interval);	
+					  
+					  
+					  d3.select('#prev-div')
+					  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+				  }
+				 
+			  }
+			  
 		  }
 		  else 
 			  d3.select('#started-div')
 						.style('color', 'red')
-						.text('Error! Connection Failed. Please Reload');
+						.text('Server Error! Try Reload');
 
 		}
 	  };	// End of Ajax GET request  
-
-	var timer_id = 0; // for cancelling the setInterval
-	// The play pause css button
-	var icon = d3.select('.play'); // the node
+	
 	
 	icon.on('click', function() {
       //icon.toggleClass('active');
@@ -83,7 +153,7 @@ window.onload = function() {
 					  else 
 						  d3.select('#started-div')
 									.style('color', 'red')
-									.text('Error! Connection Failed. Please Retry');
+									.text('Server Error! Please Retry');
 
 					}
 			  };	  
@@ -128,13 +198,9 @@ window.onload = function() {
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
-					  var current_div = d3.select('#current-div');
-					  
-					  var total_div = d3.select('#total-div')
-					  			.select('div');
 					  
 					  d3.select('#started-div')
-					  			.text('Started at ' + (starth>12?starth-12:starth) + '.'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
+					  			.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 					  
 					  current_div.text('Current Session: 0m');
 					  
@@ -151,7 +217,7 @@ window.onload = function() {
 						  //console.log('now: '+now.minute());
 						  //console.log('startm: '+startm);
 						  
-					  }, 1000*1);	
+					  }, 1000*time_set_interval);	
 					  
 					  
 					  d3.select('#prev-div')
@@ -162,7 +228,7 @@ window.onload = function() {
 				  else 
 					  d3.select('#started-div')
 						  		.style('color', 'red')
-					  			.text('Error! Connection Failed. Please Retry');
+					  			.text('Server Error! Please Retry');
 				  
 				}
 		  };
