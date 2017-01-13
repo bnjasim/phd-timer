@@ -11,6 +11,8 @@ window.onload = function() {
 	
 	var timer_id = 0; // for cancelling the setInterval
 	var time_set_interval = 1; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	var now = moment();
+	
 	// The play pause css button
 	var icon = d3.select('.play');
 	
@@ -18,6 +20,32 @@ window.onload = function() {
 					  
 	var total_div = d3.select('#total-div')
 				.select('div'); // there is an edit link inside total-div
+	
+	// Common things like setting current streak, total today etc.
+	// shouldn't be repeated in playing state as well as reload of playing state
+	function display_divs_and_set_timer() {
+		
+		d3.select('#started-div')
+				  .text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
+
+	    total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
+
+	    timer_id = setInterval(function(){
+		  //now = moment();				  
+		  now = now.add(1, 'minute');
+		  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
+
+		  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
+
+		  //console.log('now: '+now.minute());
+		  //console.log('startm: '+startm);
+
+	    }, 1000*time_set_interval);	
+
+
+	    d3.select('#prev-div')
+				  .text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+	};
 	
 	// Send an AJAX GET request for the state of the timer
 	var xhr = new XMLHttpRequest();
@@ -33,7 +61,7 @@ window.onload = function() {
 		  if (xhr.status === OK) {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
-			  var now = moment();
+			  now = moment();
 		  	  var date = now.toJSON().substr(0,10); //2017-01-13 
 			  
 			  // if previous state was not playing, it is easy
@@ -73,26 +101,8 @@ window.onload = function() {
 					  totalh = response.totalh;
 				      totalm = response.totalm;
 					  
-					  d3.select('#started-div')
-					  			.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
-					  
-					  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
-					  
-					  timer_id = setInterval(function(){
-						  //now = moment();				  
-						  now = now.add(1, 'minute');
-						  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
-						  
-						  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
-						  
-						  //console.log('now: '+now.minute());
-						  //console.log('startm: '+startm);
-						  
-					  }, 1000*time_set_interval);	
-					  
-					  
-					  d3.select('#prev-div')
-					  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+					  // Set all the divs: started-div, current-div, total-div and prev-div
+					  display_divs_and_set_timer();
 				  }
 				 
 			  }
@@ -109,7 +119,8 @@ window.onload = function() {
 	
 	icon.on('click', function() {
       //icon.toggleClass('active');
-	  
+	  now = moment();
+		
 	  if (icon.classed('active')) {
 		  // clicked to pause. Set icon as play
 		  icon.attr('class', 'play');
@@ -119,7 +130,6 @@ window.onload = function() {
 		  clearInterval(timer_id);
 		  
 		  // Paused/Stopped. So compute the totalh and totalm now!
-		  var now = moment();
 		  var date = now.toJSON().substr(0,10); //2017-01-13 
 		  totalh = totalh + now.hour() - starth;
 		  totalm = totalm + now.minute() - startm;
@@ -174,7 +184,7 @@ window.onload = function() {
 		  d3.select('#total-edit')
 		  			.attr('class', 'disabled');
 		  
-		  var now = moment();
+
 		  var date = now.toJSON().substr(0,10); //2017-01-10 
 		 
 		  // Ajax post request to set the start time and active status
@@ -198,31 +208,11 @@ window.onload = function() {
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
-					  
-					  d3.select('#started-div')
-					  			.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
-					  
+					  		  
 					  current_div.text('Current Session: 0m');
-					  
-					  
-					  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
-					  
-					  timer_id = setInterval(function(){
-						  //now = moment();				  
-						  now = now.add(1, 'minute');
-						  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
-						  
-						  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
-						  
-						  //console.log('now: '+now.minute());
-						  //console.log('startm: '+startm);
-						  
-					  }, 1000*time_set_interval);	
-					  
-					  
-					  d3.select('#prev-div')
-					  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
-					  
+
+					  // Set all the divs: started-div, current-div, total-div and prev-div
+					  display_divs_and_set_timer();
 					  
 				  }
 				  else 
@@ -238,8 +228,8 @@ window.onload = function() {
      });
 	
 
-	// First rendering of the calendar heatmap
-	var now = moment().endOf('day').toDate();
+	  // First rendering of the calendar heatmap
+	  now = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
       var chartData = d3.time.days(yearAgo, now).map(function (dateElement) {
         return {
@@ -256,7 +246,8 @@ window.onload = function() {
                         console.log('data', data);
                       });
       heatmap();  // render the chart
-}
+
+} // End window.onload
 
 // 1h-45m should be formatted as 15m
 function format_time_diff(h, m) {
