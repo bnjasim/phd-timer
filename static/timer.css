@@ -41,6 +41,16 @@ body{
 	text-align: center;
 	margin-top: 10px;
 	font-size: 18px;
+	min-height: 25px;
+}
+
+#current-div {
+	margin-top: 54px;
+}
+
+#commit-button {
+	margin-top: 10px;
+	visibility: hidden;
 }
 
 

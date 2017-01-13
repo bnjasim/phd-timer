@@ -9,18 +9,30 @@ window.onload = function() {
 	var icon = d3.select('.play'); // the node
 	icon.on('click', function() {
       //icon.toggleClass('active');
+	  
 	  if (icon.classed('active')) {
 		  // Pausing. Set icon as play
 		  icon.attr('class', 'play');
+		  
 		  // clear any existing time intervals
 		  // otherwise interesting effects of closure
 		  clearInterval(timer_id);
+		  
+		  // Show the commit button
+		  d3.select('#commit-button')
+		  			.style('visibility', 'visible');
+		  
+		  
 					  
 		  
 	  } // end of if
 	  else {
 		  // Need to set as playing. Change icon to pause
 		  icon.attr('class', 'play active');
+		  
+		  // hide the commit button
+		  d3.select('#commit-button')
+		  			.style('visibility', 'hidden');
 		  
 		  var now = moment();
 		  var nowh = now.hour();
