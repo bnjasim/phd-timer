@@ -4,6 +4,21 @@
 
 window.onload = function() {
 	
+	// TODO
+	// 1. On page reload, and the last time timer was running, and it was started some day back, what to do?
+	//    - Discard if continuous work is > 23h 
+	// 2. Edit button action: textarea for changing h & m. Also Date picker. Error if totalh > 23h or < 0h in a day 
+	// 3. Add Notes
+	// 4. When paused/stopped, check if date crosses two days, then if submit make two commits. Otherwise user can edit 
+	//    If manually editing, give instruction that you have to make two separate submits. default date to yesterday if manually edit.
+	// 5. When paused/stopped, what if user forgets to commit. Instead start play again?
+	//    - case1: If played almost immediately (<2m gap) set the earlier start time, subtract the total
+	//    - case2: If a large gap, then just notify (fixed above) that the last work was not committed
+	// 6. What if start playing before initial ajax load? - Done!
+	// 7. Server Error handling: If clicked on play, the icon changes. But if server error, reset the icon as well as the variables
+	// 8. The HeatMap
+	
+	
 	var totalh = 0; // don't ever change these
     var totalm = 0;
     var starth = 0; // duplicate of nowh - but ok!
@@ -34,7 +49,7 @@ window.onload = function() {
 		
 		current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
-	    total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
+	    total_div.text('Total Today: ' + format_time_diff( totalh+now.hour()-starth, totalm+now.minute()-startm ));
 
 	    timer_id = setInterval(function(){
 		  now = moment();				  
@@ -74,7 +89,8 @@ window.onload = function() {
 			  console.log(response);
 			  if (!response.active) {
 				  // no need to change the play icon
-				  
+				  // But in case, the user clicks on the play button before initial ajax load, reest it.
+				  icon.attr('class', 'play');
 				  // Only consider total work of today. Not someday's before
 				  // If first time access and work doesn't exist in server, date field will be null
 				  if (response.date && date === response.date) {
@@ -128,9 +144,10 @@ window.onload = function() {
 	icon.on('click', function() {
       //icon.toggleClass('active');
 	  now = moment();
-		
+	
+	  // clicked to pause. Set icon as play
 	  if (icon.classed('active')) {
-		  // clicked to pause. Set icon as play
+		  
 		  icon.attr('class', 'play');
 		  
 		  // clear any existing time intervals
