@@ -10,7 +10,7 @@ window.onload = function() {
     var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
-	var time_set_interval = 1; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	var time_set_interval = 60; // should be set to 60 for 1 minute. Set to 1 for testing purposes
 	var now = moment();
 	
 	// The play pause css button
@@ -20,6 +20,8 @@ window.onload = function() {
 					  
 	var total_div = d3.select('#total-div')
 				.select('div'); // there is an edit link inside total-div
+	
+	var commit_button = d3.select('#commit-button');
 	
 	// Common things like setting current streak, total today etc.
 	// shouldn't be repeated in playing state as well as reload of playing state
@@ -31,8 +33,8 @@ window.onload = function() {
 	    total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 
 	    timer_id = setInterval(function(){
-		  //now = moment();				  
-		  now = now.add(1, 'minute');
+		  now = moment();				  
+		  // now = now.add(1, 'minute');
 		  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 		  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
@@ -135,10 +137,19 @@ window.onload = function() {
 		  totalh = totalh + now.hour() - starth;
 		  totalm = totalm + now.minute() - startm;
 		  
-		  // TODO: normalize the total. Avoid negative in totalm
+		  // Avoid negative in totalm
+		  if (totalm < 0) {
+			  totalm += 60;
+			  totalh -= 1;
+		  }
+		  // Also avoid minute >= 60
+		  if (totalm >= 60) {
+			  totalm -= 60;
+			  totalh += 1;
+		  }
 		  
 		  // Show the commit button
-		  var commit_button = d3.select('#commit-button');
+		  commit_button.text('Commit');
 		  commit_button.attr('disabled', null);
 		  
 		  // Show the edit total streak option
@@ -161,6 +172,10 @@ window.onload = function() {
 					if (xhr.readyState === DONE) {
 					  if (xhr.status === OK) {
 						  // var response = JSON.parse(xhr.responseText); // no response from server
+						  // Set the commit button as Done! (and fade it - optional)
+						  commit_button.text('Done!');
+						  commit_button.attr('disabled', 'disabled');
+						  
 					  }
 					  else 
 						  d3.select('#started-div')
@@ -174,13 +189,14 @@ window.onload = function() {
 					  
 		  
 	  } 
+		
+	  // clicked to play. Change icon to pause	
 	  else {
-		  // clicked to play. Change icon to pause
+		  
 		  icon.attr('class', 'play active');
 		  
 		  // hide the commit button
-		  d3.select('#commit-button')
-		  			.attr('disabled', 'disabled');
+		  commit_button.attr('disabled', 'disabled');
 		  
 		  // hide the edit total streak option
 		  d3.select('#total-edit')
