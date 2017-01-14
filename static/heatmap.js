@@ -27,8 +27,12 @@ window.onload = function() {
 	// shouldn't be repeated in playing state as well as reload of playing state
 	function display_divs_and_set_timer() {
 		
+		now = moment();
+		
 		d3.select('#started-div')
 				  .text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
+		
+		current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 	    total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 
@@ -89,13 +93,14 @@ window.onload = function() {
 				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 			  }
 			  
+			  // If previous state was playing, reset anyhow and deal with the errors 'like more than 24h' when paused
 			  else {
-			  // If previous state was playing, reset anyhow.
+			  
 			      starth = response.starth;
 				  startm = response.startm;
 				  var start_date = response.date;
 				  
-				  console.log('date='+date+' start date='+start_date);
+				  // console.log('date='+date+' start date='+start_date);
 				  // If same date, good to go! Just change the icon to pause, set start time, compute streak etc.
 				  if (start_date === date) {
 					  // Change icon to pause. We are playing now!
@@ -226,9 +231,6 @@ window.onload = function() {
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
-					  		  
-					  current_div.text('Current Session: 0m');
-
 					  // Set all the divs: started-div, current-div, total-div and prev-div
 					  display_divs_and_set_timer();
 					  
