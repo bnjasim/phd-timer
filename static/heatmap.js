@@ -6,7 +6,7 @@ window.onload = function() {
 	
 	// TODO
 	// 1. On page reload, and the last time timer was running, and it was started some day back, what to do?
-	//    - Discard if continuous work is > 23h 
+	//    - Discard if continuous work is > 23h. Better suggestion => Do as in play after pause (5)
 	// 2. Edit button action: textarea for changing h & m. Also Date picker. Error if totalh > 23h or < 0h in a day 
 	// 3. Add Notes
 	// 4. When paused/stopped, check if date crosses two days, then if submit make two commits. Otherwise user can edit 
@@ -198,6 +198,9 @@ window.onload = function() {
 						  commit_button.text('Done!');
 						  commit_button.attr('disabled', 'disabled');
 						  
+						  d3.select('#started-div')
+				  				.text('Click to Start');
+						  
 					  }
 					  else 
 						  d3.select('#started-div')
@@ -289,10 +292,14 @@ window.onload = function() {
 // 1h-45m should be formatted as 15m
 function format_time_diff(h, m) {
 	if (m < 0) {
-		m = 60 + m;
-		h = h - 1;
+		m += 60;
+		h -= 1;
 	}
 	
+	if (m >= 60) {
+		h += 1;
+		m -= 60;
+	}
 	return (h>0 ? h+'h ' : '') + m+'m';
 }
 
