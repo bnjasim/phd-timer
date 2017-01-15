@@ -27,6 +27,8 @@ window.onload = function() {
 	var timer_id = 0; // for cancelling the setInterval
 	var time_set_interval = 60; // should be set to 60 for 1 minute. Set to 1 for testing purposes
 	var now = moment();
+	var date = now.toJSON().substr(0,10); //2017-01-13 
+	var date_of_page_load = date; // The page load date. May not be absolutely necessary! But for readability's sake
 	
 	// The play pause css button
 	var icon = d3.select('.play');
@@ -82,8 +84,6 @@ window.onload = function() {
 		  if (xhr.status === OK) {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
-			  now = moment();
-		  	  var date = now.toJSON().substr(0,10); //2017-01-13 
 			  
 			  // if previous state was not playing, it is easy
 			  console.log(response);
@@ -155,7 +155,7 @@ window.onload = function() {
 		  clearInterval(timer_id);
 		  
 		  // Paused/Stopped. So compute the totalh and totalm now!
-		  var date = now.toJSON().substr(0,10); //2017-01-13 
+		  date = now.toJSON().substr(0,10); //2017-01-13 
 		  totalh = totalh + now.hour() - starth;
 		  totalm = totalm + now.minute() - startm;
 		  
@@ -227,8 +227,16 @@ window.onload = function() {
 		  d3.select('#total-edit')
 		  			.attr('class', 'disabled');
 		  
-
-		  var date = now.toJSON().substr(0,10); //2017-01-10 
+		  // We have to make sure that totalh is 0 if played on a new day!
+		  // totalh and totalm may persist from the previous day
+		  date = now.toJSON().substr(0,10); //2017-01-10 
+		  
+		  if(date !== date_of_page_load) {
+			  totalh = 0;
+			  totalm = 0;
+			  // Also once played, consider that as a page load with fresh values for variables
+			  date_of_page_load = date;
+		  }
 		 
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
