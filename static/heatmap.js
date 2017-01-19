@@ -6,22 +6,20 @@ window.onload = function() {
 	
 	// TODO
 	// 1. On page reload, and the last time timer was running, and it was started some day back, what to do?
-	//    - Discard if continuous work is > 23h. Better suggestion => Do as in play after pause (5)
+	//    - Discard if continuous work is > 23h. 
 	// 2. Edit button action: textarea for changing h & m. Also Date picker. Error if totalh > 23h or < 0h in a day 
 	// 3. Add Notes
 	// 4. When paused/stopped, check if date crosses two days, then if submit make two commits. Otherwise user can edit 
 	//    If manually editing, give instruction that you have to make two separate submits. default date to yesterday if manually edit.
-	// 5. When paused/stopped, what if user forgets to commit. Instead start play again?
-	//    - case1: If played almost immediately (<2m gap) set the earlier start time, subtract the total
-	//    - case2: If a large gap, then just notify (fixed above) that the last work was not committed
-	// 6. What if start playing before initial ajax load? - Done!
+	// 5. When paused datastore write to Entry also
+	// 6. 
 	// 7. Server Error handling: If clicked on play, the icon changes. But if server error, reset the icon as well as the variables
 	// 8. The HeatMap
 	
 	
-	var totalh = 0; // don't ever change these
+	var totalh = 0; 
     var totalm = 0;
-    var starth = 0; // duplicate of nowh - but ok!
+    var starth = 0; 
     var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
@@ -86,7 +84,7 @@ window.onload = function() {
 			  var response = JSON.parse(xhr.responseText);
 			  
 			  // if previous state was not playing, it is easy
-			  console.log(response);
+			  // console.log(response);
 			  if (!response.active) {
 				  // no need to change the play icon
 				  // But in case, the user clicks on the play button before initial ajax load, reest it.
@@ -96,7 +94,12 @@ window.onload = function() {
 				  if (response.date && date === response.date) {
 				    totalh = response.totalh;
 				    totalm = response.totalm;
-				  }  
+				  }
+				  // not required as total is 0 when loaded, but... for readability
+				  else {
+					  totalh = 0;
+					  totalm = 0;
+				  }
 				  
 				  d3.select('#started-div')
 				  			.text('Click to Start');
@@ -110,6 +113,8 @@ window.onload = function() {
 			  }
 			  
 			  // If previous state was playing, reset anyhow and deal with the errors 'like more than 24h' when paused
+			  // If date diff is greater than 1, set state to paused. 
+			  // If the start time is greater than current time (like started at 23.00 yesterday and now time is 2am), deal appropriately
 			  else {
 			  
 			      starth = response.starth;
@@ -151,7 +156,6 @@ window.onload = function() {
 		  icon.attr('class', 'play');
 		  
 		  // clear any existing time intervals
-		  // otherwise interesting effects of closure
 		  clearInterval(timer_id);
 		  
 		  // Paused/Stopped. So compute the totalh and totalm now!
@@ -169,6 +173,38 @@ window.onload = function() {
 			  totalm -= 60;
 			  totalh += 1;
 		  }
+		  
+		  // Sumit automatically when paused itself
+		  // Ajax Post request
+			  var xhr = new XMLHttpRequest();
+			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
+		  	  var params = '/?date='+date+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  	  //console.log(params);
+			  xhr.open('POST', params);
+			  xhr.send();
+
+			  xhr.onreadystatechange = function () {
+					var DONE = 4; // readyState 4 means the request is done.
+					var OK = 200; // status 200 is a successful return.
+					if (xhr.readyState === DONE) {
+					  if (xhr.status === OK) {
+						  // var response = JSON.parse(xhr.responseText); // no response from server
+						  // Set the commit button as Done! (and fade it - optional)
+						  // commit_button.text('Done!');
+						  // commit_button.attr('disabled', 'disabled');
+						  
+						  
+						  
+					  }
+					  else 
+						  d3.select('#started-div')
+									.style('color', 'red')
+									.text('Server Error!');
+
+					}
+			  };	
+		  
+		  
 		  
 		  // Show the commit button
 		  commit_button.text('Commit');
