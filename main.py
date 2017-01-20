@@ -34,7 +34,7 @@ class Account(ndb.Model):
 	
 class Entry(ndb.Model):
 	# The parent of an Entry is Account
-	date = ndb.DateProperty(required = True)	
+	date = ndb.DateProperty(indexed = True)	
 	hours = ndb.IntegerProperty()
 	mins = ndb.IntegerProperty()
 	notes = ndb.TextProperty()
@@ -82,7 +82,7 @@ class Handler(webapp2.RequestHandler):
 	
 
 class TimerHandler(Handler):
-	
+	# get request for html of the page
 	def get(self):	
 		user = users.get_current_user()
 		if user is None: 
@@ -94,6 +94,7 @@ class TimerHandler(Handler):
 				user_name = user.nickname(), 
 				logout_url = logout)	
 
+	# All write to the datastore
 	def post(self):
 		
 		user = users.get_current_user()
@@ -120,15 +121,33 @@ class TimerHandler(Handler):
 			# To read work using key
 			# wKey = ndb.Key('Work', user.user_id())
 			# work = wKey.get()
-			work = Work(active=active, starth=starth, startm=startm, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())	
+			# manually set the key for work. Only one instance of work is there.
+			work = Work(active=active, starth=starth, startm=startm, date=ndb_date, totalh=totalh, totalm=totalm, id=user.user_id())
 			work.put()
+
+			# we need to write Entry only when paused/stopped, not when started to play
+			# When paused active will be made false
+			if (not active):
+				# Check if an entry corresponding to the date already exists!
+				qry = Entry.query(Entry.date == ndb_date)
+				qry_result = qry.fetch()
+				# qry_result is [] if new date
+				if (not qry_result):
+					# make user as the parent entity so that entry of many users can be distinguished
+					entry = Entry(date=ndb_date, hours=totalh, mins=totalm, parent=user_ent_key)	
+				else:
+					entry = qry_result[0]
+					entry.hours = totalh
+					entry.mins = totalm
+
+				entry.put()
 			
 			# No response is required!!!
 			# response_data = {"totalh":totalh, "totalm":totalm, "starth":starth, "startm":startm }
 			# self.response.out.write(json.dumps(response_data))	
 
 class AjaxHandler(Handler):
-
+	# page load get request
 	def get(self):	
 		user = users.get_current_user()
 		if user is None: 
