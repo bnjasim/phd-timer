@@ -16,6 +16,8 @@ window.onload = function() {
 	// 7. Server Error handling: If clicked on play, the icon changes. But if server error, reset the icon as well as the variables
 	// 8. The HeatMap
 	
+	// momentjs toJSON gives Greewich date
+	moment.fn.toJSON = function() { return this.format(); }
 	
 	var totalh = 0; 
     var totalm = 0;
@@ -24,7 +26,7 @@ window.onload = function() {
 	
 	var timer_id = 0; // for cancelling the setInterval
 	var timer_set_interval = 10; // should be set to 60 for 1 minute. Set to 1 for testing purposes
-	var now = moment(); // now will be upto date if timer is running, otherwise not
+	now = moment(); // now will be upto date if timer is running, otherwise not
 	var date_today = now.toJSON().substr(0,10); //2017-01-13 
 	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 	var start_date = date_today; // date of starth and startm
@@ -37,6 +39,7 @@ window.onload = function() {
 	var previous_div = d3.select('#prev-div')
 	var current_div = d3.select('#current-div');			  
 	var total_div = d3.select('#total-div').select('div'); // BE_CAREFUL - HTML may change
+	var date_div = d3.select('#date-div').select('div'); // BE_CAREFUL - HTML may change
 	var commit_button = d3.select('#commit-button');
 	
 	
@@ -58,6 +61,8 @@ window.onload = function() {
 	// called from display_divs_and_set_timer() function
 	function timer_ticked() {
 		//now = moment();
+		date_today = now.toJSON().substr(0,10); //2017-01-13 
+		date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 		
 		started_div.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 		
@@ -66,6 +71,11 @@ window.onload = function() {
 	    total_div.text('Total Today: ' + format_time_diff( totalh+now.hour()-starth, totalm+now.minute()-startm ));
 		
 		previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+		
+		date_div.text('Date: ' + date_today);
+		
+		console.log(now);
+		console.log(now.toJSON().substr(0,10));
 		
 	}
 		
@@ -116,6 +126,7 @@ window.onload = function() {
 			  
 			  var continue_play = response.active && (started_today || started_yesterday);
 			  
+			  // Playing
 			  if (continue_play) {		      
 				  // Change icon to pause
 		  	  	  icon.attr('class', 'play active');					  
@@ -137,15 +148,15 @@ window.onload = function() {
 					  totalm = 0;
 				  }
 				  
-				  d3.select('#started-div')
-				  			.text('Click to Start');
+				  started_div.text('Click to Start');
 				  
 				  current_div.text('Current Session: --:--')
 				  
-				  d3.select('#prev-div')
-				  			.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+				  previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
 				  
 				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
+				  
+				  date_div.text('Date: ' + date_today);
 			  }
 			
 			  
@@ -211,9 +222,7 @@ window.onload = function() {
 						  
 					  }
 					  else 
-						  d3.select('#started-div')
-									.style('color', 'red')
-									.text('Server Error!');
+						  started_div.style('color', 'red').text('Server Error!');
 
 					}
 			  };	
@@ -248,20 +257,16 @@ window.onload = function() {
 						  commit_button.text('Done!');
 						  commit_button.attr('disabled', 'disabled');
 						  
-						  d3.select('#started-div')
-				  				.text('Click to Start');
+						  started_div.text('Click to Start');
 						  
 					  }
 					  else 
-						  d3.select('#started-div')
-									.style('color', 'red')
-									.text('Server Error! Please Retry');
+						  started_div.style('color', 'red').text('Server Error! Please Retry');
 
 					}
 			  };	  
 
-		  }); // end of commit button submit
-					  
+		  }); // end of commit button submit				  
 		  
 	  } 
 		
