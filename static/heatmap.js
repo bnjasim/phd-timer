@@ -29,6 +29,8 @@ window.onload = function() {
 	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 	var start_date = date_today; // date of starth and startm
 	
+	var max_allowed_working_hours = 16; // You can't work more than 16 hours a day
+	
 	// The play pause css button
 	var icon = d3.select('.play');	
 	var started_div = d3.select('#started-div');
@@ -100,21 +102,37 @@ window.onload = function() {
 			  // But if the start date is yesterday,
 			  // If it has been playing, cut it off till 24.00, commit it and start playing from 00AM
 			  // If it was already paused, make sure totalh and totalm are both 0
+			  starth = response.starth;
+			  startm = response.startm;
+			  totalh = response.totalh;
+			  totalm = response.totalm;
 			  
-			  // if previous state was not playing, it is easy
-			  // console.log(response);
-			  if (!response.active) {
+			  // if previous state was not playing or if it was playing but started two days back then we will set as paused
+			  // Even if started yesterday, if yesterday's work > 16h, we ignore it and set as paused.
+			  // bool variable
+			  var started_yesterday = (start_date === date_yesterday) && ((totalh + totalm/60 + 24-starth-(startm/60)) <= max_allowed_working_hours);
+			  // Even if started today, if has been playing for more than 16 hours, ignore it
+			  var started_today = (start_date === date_today) && ((totalh + totalm/60 + now.hour()-starth + ((now.minute()-startm)/60)) <= max_allowed_working_hours);
+			  
+			  var continue_play = response.active && (started_today || started_yesterday);
+			  
+			  if (continue_play) {		      
+				  // Change icon to pause
+		  	  	  icon.attr('class', 'play active');					  
+			      // The crossing of dates will be taken cared in timer_ticked function
+			      display_divs_and_set_timer();			 
+				 
+			  }
+			  
+			  // Paused
+			  else {
 				  // no need to change the play icon
-				  // But in case, the user clicks on the play button before initial ajax load, reest it.
+				  // But in case, the user clicks on the play button before initial ajax response, reest it.
 				  icon.attr('class', 'play');
 				  // Only consider total work of today. Not someday's before
-				  // If first time access and work doesn't exist in server, date field will be null
-				  if (start_date === date_today) {
-				    totalh = response.totalh;
-				    totalm = response.totalm;
-				  }
-				  // not required as total is 0 when loaded, but... for readability
-				  else {
+				  // If first time access and work doesn't exist in server, start_date field will be null
+				  if (start_date !== date_today) {
+				  
 					  totalh = 0;
 					  totalm = 0;
 				  }
@@ -129,29 +147,7 @@ window.onload = function() {
 				  
 				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 			  }
-			  
-			  // If previous state was playing, reset anyhow and deal with the errors 'like more than 24h' when paused
-			  // If date diff is greater than 1, set state to paused. 
-			  // If the start time is greater than current time (like started at 23.00 yesterday and now time is 2am), deal appropriately
-			  else {
-			  
-			      starth = response.starth;
-				  startm = response.startm;
-				  
-				  // console.log('date='+date+' start date='+start_date);
-				  // If same date, good to go! Just change the icon to pause, set start time, compute streak etc.
-				  if (start_date === date_today) {
-					  // Change icon to pause. We are playing now!
-		  			  icon.attr('class', 'play active');
-					  
-					  totalh = response.totalh;
-				      totalm = response.totalm;
-					  
-					  // Set all the divs: started-div, current-div, total-div and prev-div
-					  display_divs_and_set_timer();
-				  }
-				 
-			  }
+			
 			  
 		  }
 		  else 
@@ -283,7 +279,6 @@ window.onload = function() {
 		  
 		  // We have to make sure that totalh is 0 if played on a new day!
 		  // totalh and totalm may persist from the previous day
-		  // TO_BE_REMOVED: The following code fragment
 		  if(start_date !== date_today) {
 			  totalh = 0;
 			  totalm = 0;
