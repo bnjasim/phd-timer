@@ -23,10 +23,11 @@ window.onload = function() {
     var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
-	var time_set_interval = 60; // should be set to 60 for 1 minute. Set to 1 for testing purposes
-	var now = moment();
-	var date = now.toJSON().substr(0,10); //2017-01-13 
-	var date_of_page_load = date; // The page load date. May not be absolutely necessary! But for readability's sake
+	var timer_set_interval = 10; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	var now = moment(); // now will be upto date if timer is running, otherwise not
+	var date_today = now.toJSON().substr(0,10); //2017-01-13 
+	var date_yesterday = moment().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
+	var start_date = date_today; // date of starth and startm
 	
 	// The play pause css button
 	var icon = d3.select('.play');
@@ -38,11 +39,21 @@ window.onload = function() {
 	
 	var commit_button = d3.select('#commit-button');
 	
+	// This is timer running only for Testing
+	// Simulate a clock outsid
+	setInterval(function(){
+		  //now = moment();				  
+		  now = now.add(1, 'hour');
+	      // Code for Testing purposes		
+		  d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
+
+	}, 1000*timer_set_interval);
+	
 	// Common things like setting current streak, total today etc.
 	// shouldn't be repeated in playing state as well as reload of playing state
 	function display_divs_and_set_timer() {
 		
-		now = moment();
+		//now = moment();
 		
 		d3.select('#started-div')
 				  .text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
@@ -50,18 +61,18 @@ window.onload = function() {
 		current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 	    total_div.text('Total Today: ' + format_time_diff( totalh+now.hour()-starth, totalm+now.minute()-startm ));
+		
+		// Code for Testing purposes		
+		// Comment otherwise
+		d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
 
 	    timer_id = setInterval(function(){
-		  now = moment();				  
-		  // now = now.add(1, 'minute');
+		  //now = moment();				  
 		  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 		  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
 
-		  //console.log('now: '+now.minute());
-		  //console.log('startm: '+startm);
-
-	    }, 1000*time_set_interval);	
+	    }, 1000*timer_set_interval);	
 
 
 	    d3.select('#prev-div')
@@ -83,6 +94,11 @@ window.onload = function() {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
 			  
+			  // If the start date is yesterday,
+			  var start_date = response.date;
+			  // If it has been playing, cut it off till 24.00, commit it and start playing from 00AM
+			  // If it was already paused, make sure totalh and totalm are both 0
+			  
 			  // if previous state was not playing, it is easy
 			  // console.log(response);
 			  if (!response.active) {
@@ -91,7 +107,7 @@ window.onload = function() {
 				  icon.attr('class', 'play');
 				  // Only consider total work of today. Not someday's before
 				  // If first time access and work doesn't exist in server, date field will be null
-				  if (response.date && date === response.date) {
+				  if (start_date === date_today) {
 				    totalh = response.totalh;
 				    totalm = response.totalm;
 				  }
@@ -119,11 +135,10 @@ window.onload = function() {
 			  
 			      starth = response.starth;
 				  startm = response.startm;
-				  var start_date = response.date;
 				  
 				  // console.log('date='+date+' start date='+start_date);
 				  // If same date, good to go! Just change the icon to pause, set start time, compute streak etc.
-				  if (start_date === date) {
+				  if (start_date === date_today) {
 					  // Change icon to pause. We are playing now!
 		  			  icon.attr('class', 'play active');
 					  
@@ -148,7 +163,8 @@ window.onload = function() {
 	
 	icon.on('click', function() {
       //icon.toggleClass('active');
-	  now = moment();
+	  //now = moment();
+	  date_today = now.toJSON().substr(0,10); //2017-01-13 
 	
 	  // clicked to pause. Set icon as play
 	  if (icon.classed('active')) {
@@ -159,7 +175,6 @@ window.onload = function() {
 		  clearInterval(timer_id);
 		  
 		  // Paused/Stopped. So compute the totalh and totalm now!
-		  date = now.toJSON().substr(0,10); //2017-01-13 
 		  totalh = totalh + now.hour() - starth;
 		  totalm = totalm + now.minute() - startm;
 		  
@@ -178,7 +193,7 @@ window.onload = function() {
 		  // Ajax Post request
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
-		  	  var params = '/?date='+date+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
 		  	  //console.log(params);
 			  xhr.open('POST', params);
 			  xhr.send();
@@ -219,7 +234,7 @@ window.onload = function() {
 			  // Ajax Post request
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
-		  	  var params = '/?date='+date+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
 		  	  //console.log(params);
 			  xhr.open('POST', params);
 			  xhr.send();
@@ -265,19 +280,19 @@ window.onload = function() {
 		  
 		  // We have to make sure that totalh is 0 if played on a new day!
 		  // totalh and totalm may persist from the previous day
-		  date = now.toJSON().substr(0,10); //2017-01-10 
 		  
-		  if(date !== date_of_page_load) {
+		  if(date_today !== start_date) {
 			  totalh = 0;
 			  totalm = 0;
 			  // Also once played, consider that as a page load with fresh values for variables
-			  date_of_page_load = date;
+			  start_date = date_today;
 		  }
 		 
+
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
 		  // we send total time as well which will be available when the page is loaded
-		  var params = '/?date='+date+'&active='+1+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
+		  var params = '/?date='+date_today+'&active='+1+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
@@ -313,9 +328,9 @@ window.onload = function() {
 	
 
 	  // First rendering of the calendar heatmap
-	  now = moment().endOf('day').toDate();
+	  var today_end = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
-      var chartData = d3.time.days(yearAgo, now).map(function (dateElement) {
+      var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
         return {
           date: dateElement,
           count: (dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
