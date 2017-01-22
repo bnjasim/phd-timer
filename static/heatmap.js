@@ -26,21 +26,21 @@ window.onload = function() {
 	var timer_set_interval = 10; // should be set to 60 for 1 minute. Set to 1 for testing purposes
 	var now = moment(); // now will be upto date if timer is running, otherwise not
 	var date_today = now.toJSON().substr(0,10); //2017-01-13 
-	var date_yesterday = moment().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
+	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 	var start_date = date_today; // date of starth and startm
 	
 	// The play pause css button
-	var icon = d3.select('.play');
-	
-	var current_div = d3.select('#current-div');
-					  
-	var total_div = d3.select('#total-div')
-				.select('div'); // there is an edit link inside total-div
-	
+	var icon = d3.select('.play');	
+	var started_div = d3.select('#started-div');
+	var previous_div = d3.select('#prev-div')
+	var current_div = d3.select('#current-div');			  
+	var total_div = d3.select('#total-div').select('div'); // BE_CAREFUL - HTML may change
 	var commit_button = d3.select('#commit-button');
+	
 	
 	// This is timer running only for Testing
 	// Simulate a clock outsid
+	d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
 	setInterval(function(){
 		  //now = moment();				  
 		  now = now.add(1, 'hour');
@@ -49,35 +49,36 @@ window.onload = function() {
 
 	}, 1000*timer_set_interval);
 	
+	
+	
 	// Common things like setting current streak, total today etc.
 	// shouldn't be repeated in playing state as well as reload of playing state
-	function display_divs_and_set_timer() {
-		
+	// called from display_divs_and_set_timer() function
+	function timer_ticked() {
 		//now = moment();
 		
-		d3.select('#started-div')
-				  .text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
+		started_div.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 		
 		current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 	    total_div.text('Total Today: ' + format_time_diff( totalh+now.hour()-starth, totalm+now.minute()-startm ));
 		
-		// Code for Testing purposes		
-		// Comment otherwise
-		d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
-
+		previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+		
+	}
+		
+	function display_divs_and_set_timer() {
+		// Call the inner function once before timer ticks 1 minute
+		timer_ticked();
+		
 	    timer_id = setInterval(function(){
-		  //now = moment();				  
-		  current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
+		  
+			timer_ticked();
 
-		  total_div.text('Total Today: '+ format_time_diff((totalh+now.hour()-starth), (totalm+now.minute()-startm)));
-
-	    }, 1000*timer_set_interval);	
-
-
-	    d3.select('#prev-div')
-				  .text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
+	    }, 1000*timer_set_interval);	    
+				  
 	};
+	
 	
 	// Send an AJAX GET request for the state of the timer
 	var xhr = new XMLHttpRequest();
@@ -94,8 +95,9 @@ window.onload = function() {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
 			  
-			  // If the start date is yesterday,
 			  var start_date = response.date;
+			  // date_today = now.toJSON.substr(0,10); - not needed as they are already set. Look above
+			  // But if the start date is yesterday,
 			  // If it has been playing, cut it off till 24.00, commit it and start playing from 00AM
 			  // If it was already paused, make sure totalh and totalm are both 0
 			  
@@ -165,6 +167,7 @@ window.onload = function() {
       //icon.toggleClass('active');
 	  //now = moment();
 	  date_today = now.toJSON().substr(0,10); //2017-01-13 
+	  date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // now is mutable
 	
 	  // clicked to pause. Set icon as play
 	  if (icon.classed('active')) {
@@ -280,8 +283,8 @@ window.onload = function() {
 		  
 		  // We have to make sure that totalh is 0 if played on a new day!
 		  // totalh and totalm may persist from the previous day
-		  
-		  if(date_today !== start_date) {
+		  // TO_BE_REMOVED: The following code fragment
+		  if(start_date !== date_today) {
 			  totalh = 0;
 			  totalm = 0;
 			  // Also once played, consider that as a page load with fresh values for variables
@@ -307,6 +310,9 @@ window.onload = function() {
 					  // totalm = response.totalm;
 					  starth = now.hour(); //response.starth; // duplicate of nowh - but ok!
 					  startm = now.minute();//response.startm; // duplicate of nowm - but ok! we may change nowm
+					  
+					  // We have to update the start date
+					  start_date = date_today;
 					  
 					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
 					  // Set the display
