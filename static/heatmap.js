@@ -255,7 +255,19 @@ window.onload = function() {
 		  }
 		  
 		  // Sumit automatically when paused itself
-		  // Ajax Post request
+		  // But do only so if the person is not careless. i.e. timer is not running continuously for so long
+		  // It could be that today is continuation of yesterday's careless (>16h) session, so don't write today's as well
+		  if (totalh + totalm/60 > max_allowed_working_hours)
+			  careless = true; // careless could be already true from timer_ticked()
+		  	  
+		  if (careless) {
+			  totalh = 0;
+			  totalm = 0;
+		  }
+		  
+		  // Only commit if valid work
+		  else {
+		  // Ajax Post request for PAUSE
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
 		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
@@ -282,7 +294,7 @@ window.onload = function() {
 					}
 			  };	
 		  
-		  
+		  }
 		  
 		  // Show the commit button
 		  commit_button.text('Commit');
