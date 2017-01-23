@@ -94,7 +94,7 @@ class TimerHandler(Handler):
 				user_name = user.nickname(), 
 				logout_url = logout)	
 
-	# All write to the datastore
+	# Only today's work & Entry write to the datastore
 	def post(self):
 		
 		user = users.get_current_user()
@@ -113,8 +113,9 @@ class TimerHandler(Handler):
 			totalm = int(self.request.get('totalm'))
 			starth = int(self.request.get('starth'))
 			startm = int(self.request.get('startm'))
-			# logging.error('***Active**** = '+ str(self.request.get('active')))
-			t = datetime.date.today() # datetime.date(2017, 1, 10)
+
+			# local time may be different from the server time
+			t = datetime.date.today() # datetime.date(2017, 1, 10) 
 			ndb_date = t.replace(year = int(date[0:4]),
 								 month = int(date[5:7]),
 								 day = int(date[8:10]))
@@ -172,6 +173,46 @@ class AjaxHandler(Handler):
 				response_data = {"active":work.active, "date":date_str, "totalh":work.totalh, "totalm":work.totalm, "starth":work.starth, "startm":work.startm}
 			
 			self.response.out.write(json.dumps(response_data))
+
+
+	# If an Entry for yesterday or some day before is edited
+	# We use a separate handler (AjaxHandler) as we don't want to modify work
+	def post(self):
+		
+		user = users.get_current_user()
+		if user is None: 
+			self.redirect(users.create_login_url('/login'))
+			
+		else:
+			user = users.get_current_user()
+			user_ent_key = ndb.Key(Account, user.user_id())	
+
+			date = str(self.request.get('date')) # client date as string "2017-01-10". Server time Could be different
+			totalh = int(self.request.get('totalh'))
+			totalm = int(self.request.get('totalm'))
+			
+			# local time may be different from the server time
+			t = datetime.date.today() # datetime.date(2017, 1, 10) 
+			ndb_date = t.replace(year = int(date[0:4]),
+								 month = int(date[5:7]),
+								 day = int(date[8:10]))
+			
+			# Update a previous day's entry
+			
+			# Check if an entry corresponding to the date already exists!
+			qry = Entry.query(Entry.date == ndb_date)
+			qry_result = qry.fetch()
+			# qry_result is [] if new date
+			if (not qry_result):
+				# make user as the parent entity so that entry of many users can be distinguished
+				entry = Entry(date=ndb_date, hours=totalh, mins=totalm, parent=user_ent_key)	
+			else:
+				entry = qry_result[0]
+				entry.hours = totalh
+				entry.mins = totalm
+
+			entry.put()
+					
 
 
 app = webapp2.WSGIApplication([

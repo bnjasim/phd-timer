@@ -26,21 +26,21 @@ window.onload = function() {
 	
 	var timer_id = 0; // for cancelling the setInterval
 	var timer_set_interval = 10; // should be set to 60 for 1 minute. Set to 1 for testing purposes
-	now = moment(); // now will be upto date if timer is running, otherwise not
+	var now = moment(); // now will be upto date if timer is running, otherwise not
 	var date_today = now.toJSON().substr(0,10); //2017-01-13 
 	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 	var start_date = date_today; // date of starth and startm
 	
 	var max_allowed_working_hours = 16; // You can't work more than 16 hours a day
+	var careless = false; // true means the timer is running for so long, but user is not working 
 	
-	// The play pause css button
-	var icon = d3.select('.play');	
-	var started_div = d3.select('#started-div');
+	var commit_button = d3.select('#commit-button');
 	var previous_div = d3.select('#prev-div')
-	var current_div = d3.select('#current-div');			  
+	var started_div = d3.select('#started-div');
+	var curent_div = d3.select('#current-div');			  
 	var total_div = d3.select('#total-div').select('div'); // BE_CAREFUL - HTML may change
 	var date_div = d3.select('#date-div').select('div'); // BE_CAREFUL - HTML may change
-	var commit_button = d3.select('#commit-button');
+	var ic_play = d3.select('.play');	
 	
 	
 	// This is timer running only for Testing
@@ -56,7 +56,7 @@ window.onload = function() {
 	
 	
 	
-	// Common things like setting current streak, total today etc.
+	
 	// shouldn't be repeated in playing state as well as reload of playing state
 	// called from display_divs_and_set_timer() function
 	function timer_ticked() {
@@ -64,21 +64,76 @@ window.onload = function() {
 		date_today = now.toJSON().substr(0,10); //2017-01-13 
 		date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 		
+		// Very Important! If time crosses 11.59PM to 00AM, do a db write of last day's work
+		if (start_date !== date_today) {
+			// Find out the number of hours of work in the last day
+			var total_yh = totalh + 24 - starth;
+			var total_ym = totalm - startm;
+			
+			if (total_ym < 0) {
+				total_yh -= 1;
+				total_ym += 60;
+			}
+			
+			// If the timer has been running for more than 16h? Simply ignore it!
+			if (start_date !== date_yesterday || (total_yh+total_ym/60 > max_allowed_working_hours)) {
+				careless = true;
+			}
+			
+			// If eligible, yesterday's work has to be written to the datastore
+			if(!careless) {
+				
+				var xhr = new XMLHttpRequest();
+				// We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
+				var params = '/ajax?date='+date_yesterday+'&totalh='+total_yh+'&totalm='+total_ym;
+				//console.log(params);
+				xhr.open('POST', params);
+				xhr.send();
+				xhr.onreadystatechange = function () {
+					var DONE = 4; // readyState 4 means the request is done.
+					var OK = 200; // status 200 is a successful return.
+					if (xhr.readyState === DONE) {
+						if (xhr.status === OK) {
+							 
+
+
+						}
+						else 
+							started_div.style('color', 'red').text("Server Error - Yesterday's work was not committed!");
+
+					}
+				};
+				
+			}
+			
+			// After committing yesterday's work, reset all variables to today
+			// Even if the user was careless yesterday, after ignoring that work, we have to reset the variables
+			start_date = date_today;
+			starth = 0; // We are restarting at 12.00AM which is 00
+			startm = 0;
+			totalh = 0;
+			totalm = 0;
+				
+		} // End of yesterday
+		
+		// If start_date is today and it has been running for so long (>16h) , we will not do anything about it here!
+		// But when paused, we will discard it
+		
+		
 		started_div.text('Started at ' + (starth>12?starth-12:starth) + ':'+(startm<10?'0'+startm:startm.toString())+(starth>12?'PM':'AM' ));
 		
-		current_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
+		curent_div.text('Current Session: ' + format_time_diff((now.hour()-starth), (now.minute()-startm)));
 
 	    total_div.text('Total Today: ' + format_time_diff( totalh+now.hour()-starth, totalm+now.minute()-startm ));
 		
 		previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
 		
 		date_div.text('Date: ' + date_today);
-		
-		console.log(now);
-		console.log(now.toJSON().substr(0,10));
+
 		
 	}
-		
+	
+	// Common things like setting current streak, total today etc.	
 	function display_divs_and_set_timer() {
 		// Call the inner function once before timer ticks 1 minute
 		timer_ticked();
@@ -129,7 +184,7 @@ window.onload = function() {
 			  // Playing
 			  if (continue_play) {		      
 				  // Change icon to pause
-		  	  	  icon.attr('class', 'play active');					  
+		  	  	  ic_play.attr('class', 'play active');					  
 			      // The crossing of dates will be taken cared in timer_ticked function
 			      display_divs_and_set_timer();			 
 				 
@@ -139,7 +194,7 @@ window.onload = function() {
 			  else {
 				  // no need to change the play icon
 				  // But in case, the user clicks on the play button before initial ajax response, reest it.
-				  icon.attr('class', 'play');
+				  ic_play.attr('class', 'play');
 				  // Only consider total work of today. Not someday's before
 				  // If first time access and work doesn't exist in server, start_date field will be null
 				  if (start_date !== date_today) {
@@ -150,7 +205,7 @@ window.onload = function() {
 				  
 				  started_div.text('Click to Start');
 				  
-				  current_div.text('Current Session: --:--')
+				  curent_div.text('Current Session: --:--')
 				  
 				  previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
 				  
@@ -170,16 +225,16 @@ window.onload = function() {
 	  };	// End of Ajax GET request  
 	
 	
-	icon.on('click', function() {
-      //icon.toggleClass('active');
+	ic_play.on('click', function() {
+      //ic_play.toggleClass('active');
 	  //now = moment();
 	  date_today = now.toJSON().substr(0,10); //2017-01-13 
 	  date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // now is mutable
 	
 	  // clicked to pause. Set icon as play
-	  if (icon.classed('active')) {
+	  if (ic_play.classed('active')) {
 		  
-		  icon.attr('class', 'play');
+		  ic_play.attr('class', 'play');
 		  
 		  // clear any existing time intervals
 		  clearInterval(timer_id);
@@ -273,7 +328,9 @@ window.onload = function() {
 	  // clicked to play. Change icon to pause	
 	  else {
 		  
-		  icon.attr('class', 'play active');
+		  ic_play.attr('class', 'play active');
+		  
+		  careless = false; // Once user starts playing, they are no more careless
 		  
 		  // hide the commit button
 		  commit_button.attr('disabled', 'disabled');
