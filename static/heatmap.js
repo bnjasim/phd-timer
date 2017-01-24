@@ -18,6 +18,14 @@ window.onload = function() {
 	
 	// momentjs toJSON gives Greewich date
 	moment.fn.toJSON = function() { return this.format(); }
+	// define toggleClass fn
+	d3.selection.prototype.toggleClass = function(className) {  
+      this.classed(className, !this.classed(className));
+      return this;
+	}
+	// Activate the alerts d3-bootstrap
+	d3.selectAll("div.alert").call(bootstrap.alert());
+
 	
 	var totalh = 0; 
     var totalm = 0;
@@ -700,3 +708,66 @@ if (!Array.prototype.find) {
     return undefined;
   };
 }
+
+
+
+// Alerts from d3-bootstrap
+(function(exports) {
+
+  var bootstrap = (typeof exports.bootstrap === "object")
+    ? exports.bootstrap
+    : (exports.bootstrap = {});
+
+  var dismiss = '[data-dismiss="alert"]';
+
+  bootstrap.alert = function() {
+	//console.log('alert set');
+    var alert = function(selection) {
+      selection.select(dismiss)
+        .on("click", close);
+    };
+
+    alert.close = function(selection) {
+      selection.each(close);
+    };
+
+    function close() {
+	
+	  // sel is the close button
+      var sel = d3.select(this),
+          selector = sel.attr("data-target");
+		
+      if (!selector) {
+        selector = sel.attr("span");
+		  // selector is null - PROBLEM
+		  console.log(selector);
+      }
+
+      var target = sel.select(selector);
+	//	console.log(target);
+      if (d3.event) 
+		  d3.event.preventDefault();
+
+      if (target.empty()) {
+        target = sel.classed("alert") ? sel : d3.select(sel.node().parentNode);
+      }
+
+      // TODO trigger?
+
+      target.classed("in", false);
+      if (target.classed("fade")) {
+        // TODO prefixed events?
+        target.on("transitionEnd", function() {
+          target.remove();
+        });
+      } else {
+        target.remove();
+      }
+    }
+
+    return alert;
+  };
+
+  // TODO automatic delegation of alert closing?
+
+})(this);
