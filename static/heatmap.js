@@ -46,8 +46,8 @@ window.onload = function() {
 	var previous_div = d3.select('#prev-div')
 	var started_div = d3.select('#started-div');
 	var curent_div = d3.select('#current-div');			  
-	var total_div = d3.select('#total-div').select('div'); // BE_CAREFUL - HTML may change
-	var date_div = d3.select('#date-div').select('div'); // BE_CAREFUL - HTML may change
+	var total_div = d3.select('#total-div'); // BE_CAREFUL - HTML may change
+	var date_div = d3.select('#date-div'); // .select('div'); // BE_CAREFUL - HTML may change
 	var ic_play = d3.select('.play');	
 	
 	
@@ -136,8 +136,7 @@ window.onload = function() {
 		
 		previous_div.text('Before the Current Session: ' + format_time_diff(totalh, totalm) );
 		
-		date_div.text('Date: ' + date_today);
-
+		date_div.text('Date: ' + format_date(date_today));
 		
 	}
 	
@@ -315,8 +314,8 @@ window.onload = function() {
 		  commit_button.attr('disabled', null);
 		  
 		  // Show the edit total streak option
-		  d3.select('#total-edit')
-		  			.attr('class', null);
+		  d3.select('#total-edit-button').classed('disabled', false);
+		  			//.attr('class', null);
 		  
 		  // When commit button is clicked
 		  commit_button.on('click', function() {
@@ -363,8 +362,8 @@ window.onload = function() {
 		  commit_button.attr('disabled', 'disabled');
 		  
 		  // hide the edit total streak option
-		  d3.select('#total-edit')
-		  			.attr('class', 'disabled');
+		  d3.select('#total-edit-button').classed('disabled', true);
+		  			//.attr('class', 'disabled');
 		  
 		  // We have to make sure that totalh is 0 if played on a new day!
 		  // totalh and totalm may persist from the previous day
@@ -455,13 +454,29 @@ function format_time_diff(h, m) {
 	return (h>0 ? h+'h ' : '') + m+'m';
 }
 
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+// Format date as Jan-27-2017
+function format_date(date_string) {
+	// date_string 2017-01-29
+	var year = parseInt(date_string.substr(0, 4), 10);
+	var month = parseInt(date_string.substr(5,2), 10);
+	var day = parseInt(date_string.substr(8,2), 10);
+	
+	out_string = day + '-' + months[month-1] + '-' + year;
+	return out_string;
+}
+
+
+
 // calendar code
 function calendarHeatmap() {
   // defaults
   var width = 720;
   var height = 110;
   var legendWidth = 150;
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var selector = 'body';
   var SQUARE_LENGTH = 11;
