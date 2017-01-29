@@ -143,6 +143,8 @@ window.onload = function() {
 	
 	// Common things like setting current streak, total today etc.	
 	function display_divs_and_set_timer() {
+		// It will be wise to stop any existing timers if running coz like double click on play button etc.
+		clearInterval(timer_id);
 		// Call the inner function once before timer ticks 1 minute
 		timer_ticked();
 		
@@ -203,10 +205,13 @@ window.onload = function() {
 				  // no need to change the play icon
 				  // But in case, the user clicks on the play button before initial ajax response, reest it.
 				  ic_play.attr('class', 'play');
+				  // It will be wise to stop any existing timers if running, like the play was clicked before initial ajax load
+				  clearInterval(timer_id);
 				  // Only consider total work of today. Not someday's before
 				  // If first time access and work doesn't exist in server, start_date field will be null
+				  // Also if total refers to yesterday's, set it to 0
 				  if (start_date !== date_today) {
-				  
+					  
 					  totalh = 0;
 					  totalm = 0;
 				  }
@@ -227,7 +232,7 @@ window.onload = function() {
 		  else 
 			  d3.select('#started-div')
 						.style('color', 'red')
-						.text('Server Error! Try Reload');
+						.text('Server Error! Please Refresh Page');
 
 		}
 	  };	// End of Ajax GET request  
@@ -242,7 +247,8 @@ window.onload = function() {
 	  // clicked to pause. Set icon as play
 	  if (ic_play.classed('active')) {
 		  
-		  ic_play.attr('class', 'play');
+		  //ic_play.attr('class', 'play');
+		  ic_play.classed('active', false);
 		  
 		  // clear any existing time intervals
 		  clearInterval(timer_id);
@@ -348,7 +354,8 @@ window.onload = function() {
 	  // clicked to play. Change icon to pause	
 	  else {
 		  
-		  ic_play.attr('class', 'play active');
+		  //ic_play.attr('class', 'play active');
+		  ic_play.classed('active', true);
 		  
 		  careless = false; // Once user starts playing, they are no more careless
 		  
@@ -368,6 +375,14 @@ window.onload = function() {
 			  start_date = date_today;
 		  }
 		 
+		  // Moved the starting from inside of ajax success to outside of ajax request
+		  // so as to start the timer immediately without waiting for response
+		  // Cancel the play state if ajax fails!
+		  starth = now.hour(); //response.starth; // duplicate of nowh - but ok!
+		  startm = now.minute();//response.startm; // duplicate of nowm - but ok! we may change nowm
+		  // Set the display
+		  // Set all the divs: started-div, current-div, total-div and prev-div
+		  display_divs_and_set_timer();
 
 		  // Ajax post request to set the start time and active status
 		  var xhr = new XMLHttpRequest();
@@ -382,28 +397,23 @@ window.onload = function() {
 				var OK = 200; // status 200 is a successful return.
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
-					  // var response = JSON.parse(xhr.responseText); // No response from server for POST
-					  // totalh = response.totalh; // don't ever change these
-					  // totalm = response.totalm;
-					  starth = now.hour(); //response.starth; // duplicate of nowh - but ok!
-					  startm = now.minute();//response.startm; // duplicate of nowm - but ok! we may change nowm
-					  
-					  // We have to update the start date
-					  start_date = date_today;
-					  
-					  //console.log(totalh+'h '+totalm+'m'); // 'This is the returned text.'
-					  // Set the display
-					  // Set all the divs: started-div, current-div, total-div and prev-div
-					  display_divs_and_set_timer();
+					  // No response from server for POST
+					  // console.log('success');
+					  // console.log(ic_play.classed('active'));
 					  
 				  }
-				  else 
-					  d3.select('#started-div')
-						  		.style('color', 'red')
-					  			.text('Server Error! Please Retry');
-				  
+				  else {
+					d3.select('#started-div').style('color', 'red').text('Server Error! Please Retry');
+					  
+					// Reset to paused state
+					//ic_play.attr('class', 'play');
+					ic_play.classed('active', false);
+					// stop timer
+					clearInterval(timer_id);
+				  }
+					
 				}
-		  };
+		  }; // End of Ajax POST
 	  } // end of else
 		
       return false;
@@ -711,7 +721,7 @@ if (!Array.prototype.find) {
 
 
 
-// Alerts from d3-bootstrap
+// Alerts from d3-bootstrap github
 (function(exports) {
 
   var bootstrap = (typeof exports.bootstrap === "object")
@@ -734,23 +744,13 @@ if (!Array.prototype.find) {
     function close() {
 	
 	  // sel is the close button
-      var sel = d3.select(this),
-          selector = sel.attr("data-target");
+      sel = d3.select(this);
 		
-      if (!selector) {
-        selector = sel.attr("span");
-		  // selector is null - PROBLEM
-		  console.log(selector);
-      }
-
-      var target = sel.select(selector);
-	//	console.log(target);
       if (d3.event) 
 		  d3.event.preventDefault();
 
-      if (target.empty()) {
-        target = sel.classed("alert") ? sel : d3.select(sel.node().parentNode);
-      }
+      target = sel.classed("alert") ? sel : d3.select(sel.node().parentNode);
+
 
       // TODO trigger?
 
