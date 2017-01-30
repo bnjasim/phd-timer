@@ -69,7 +69,8 @@ body{
 	/*pointer-events: none;
 	cursor: default;
 	opacity: 0.6;*/
-	visibility: hidden;
+	/*visibility: hidden;*/
+	display: none;
 }
 
 #total-edit-button {
@@ -77,9 +78,13 @@ body{
 	margin-top: 20px;
 }
 
+#area-editland select {
+	font-size: 12px !important;
+}
+
 #commit-button {
 	margin-top: 20px;
-	width: 82px;
+	width: 62px;
 }
 
 #alert-bottom {

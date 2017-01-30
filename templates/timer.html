@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -51,21 +52,74 @@
       	  <div class="col-sm-6 timer-div">
       	    
       	  	<div id="prev-div" class="dis-div"></div>
-      	  	<div id="total-div" class="dis-div">
-      	  		<!-- <div></div> <a href='javascript:;' id="total-edit" class="disabled">Edit</a> -->
-      	  	</div>
+      	  	  
+      	  	  <div id="area-viewland" class="disabled">
+	      	  	<div id="total-div" class="dis-div">
+	      	  		<!-- <div></div> <a href='javascript:;' id="total-edit" class="disabled">Edit</a> -->
+	      	  	</div>
 
-      	  	<div id="date-div" class="dis-div">
-      	  		
-      	  	</div>
+	      	  	<div id="date-div" class="dis-div">
+	      	  		
+	      	  	</div>
 
-      	  	<div class="dis-div">
-      	  	  <button id="total-edit-button" class="disabled">Edit</button>
-      	  	  <!-- <button class="btn btn-success" id="commit-button" disabled="disabled">Commit</button> -->
-      	  	</div>
+	      	  	<div class="dis-div">
+	      	  	  <button id="total-edit-button" class="disabled">Edit</button>
+	      	  	  <!-- <button class="btn btn-success" id="commit-button" disabled="disabled">Commit</button> -->
+	      	  	</div>
+	      	  </div>
+
+	      	  <div id="area-editland">
+
+	      	    <div class="dis-div">
+		      	    
+		      	    <select id="sel-hour">
+		      	      <option value="0">00</option>
+					  <option value="1">01</option>
+					  <option value="2">02</option>
+					  <option value="3">03</option>
+					  <option value="4">04</option>
+					  <option value="5">05</option>
+					  <option value="6">06</option>
+					  <option value="7">07</option>
+					  <option value="8">08</option>
+					  <option value="9">09</option>
+					  <option value="10">10</option>
+					  <option value="11">11</option>
+					  <option value="12">12</option>
+					  <option value="13">13</option>
+					  <option value="14">14</option>
+					  <option value="14">15</option>
+					  <option value="14">16</option>
+					</select>
+					h &nbsp;
+					<select id="sel-min">
+					  <option value="0">00</option>
+					  <option value="5">05</option>
+					  <option value="0">10</option>
+					  <option value="15">15</option>
+					  <option value="20">20</option>
+					  <option value="25">25</option>
+					  <option value="30">30</option>
+					  <option value="35">35</option>
+					  <option value="40">40</option>
+					  <option value="45">45</option>
+					  <option value="50">50</option>
+					  <option value="55">55</option>
+					</select>
+					m
+
+					<div class="dis-div">
+		      	  	  <button class="btn-xs btn-success" id="commit-button" disabled="disabled">Commit</button> 
+		      	  	</div>
+
+				</div>
+
+	      	  </div>
+	      	    	
       	  </div>
       	</div>
 <div id="current-time" class="dis-div"></div>
+        
         <div id="calendar-viz">
         </div>
       </div>
