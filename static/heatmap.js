@@ -223,7 +223,7 @@ window.onload = function() {
 				  
 				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 				  
-				  date_div.text('Date: ' + date_today);
+				  date_div.text('Date: ' + format_date(date_today));
 			  }
 			
 			  
