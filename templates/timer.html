@@ -6,6 +6,7 @@
 
   <link rel="stylesheet" type="text/css" href="static/bootstrap.css"/>
   <link rel="stylesheet" type="text/css" href="static/timer.css"/>
+  <link rel="stylesheet" type="text/css" href="static/pikaday.css">
   <link rel="stylesheet" type="text/css" href="static/heatmap.css">
 
   <script src="static/moment.js" charset="utf-8"></script>
@@ -109,6 +110,10 @@
 					m
 
 					<div class="dis-div">
+						Date: &nbsp;<input type="text" id="datepicker">
+					</div>
+
+					<div class="dis-div">
 		      	  	  <!--<button class="btn-xs btn-success" id="commit-button" disabled="disabled">Commit</button> -->
 		      	  	  <button class="btn-xs btn-success" id="commit-button">Commit</button> 
 		      	  	</div>
@@ -119,6 +124,7 @@
 	      	    	
       	  </div>
       	</div>
+
 <div id="current-time" class="dis-div"></div>
         
         <div id="calendar-viz">
@@ -136,6 +142,6 @@
 
   </div>
 
-
+<script src="static/pikaday.js"></script>
 </body>
 </html>

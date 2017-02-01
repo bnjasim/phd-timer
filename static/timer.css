@@ -88,6 +88,11 @@ body{
 	width: 62px;
 }
 
+#datepicker {
+	width: 120px;
+	font-size: 14px;
+}
+
 #alert-bottom {
 	position: fixed;
 	bottom: 0;

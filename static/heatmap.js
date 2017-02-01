@@ -398,8 +398,13 @@ window.onload = function() {
 		 // Need to set the totalh and totalm in the dropdown
 		 var element_h = document.getElementById('sel-hour');
 		 var element_m = document.getElementById('sel-mins');
+		 var element_d = document.getElementById('datepicker');
 		 element_h.value = totalh;
 		 element_m.value = totalm;
+		 element_d.value = format_date(date_today);
+		 
+		 // Set the date as date_today
+		 
 	 }); // end of edit-button on-click
 	
 	  
@@ -445,6 +450,19 @@ window.onload = function() {
 	  }); // end of commit button submit	
 	
 
+      // Enable the pikaday date picker	
+	  // Can't pick upto today, not future dates
+	  var picker = new Pikaday({ 
+		  	field: document.getElementById('datepicker'),
+		    maxDate: new Date(),
+		    onSelect: function() {
+				var dp = document.getElementById('datepicker');
+				dp.value = format_date(dp.value);
+			}
+	  });
+
+	
+	
 	  // First rendering of the calendar heatmap
 	  var today_end = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
