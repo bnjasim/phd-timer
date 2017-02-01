@@ -400,12 +400,20 @@ window.onload = function() {
 		 var element_m = document.getElementById('sel-mins');
 		 var element_d = document.getElementById('datepicker');
 		 element_h.value = totalh;
+		 console.log('totalh = '+totalh)
 		 element_m.value = totalm;
+		 // Set the date as date_today
 		 element_d.value = format_date(date_today);
 		 // If we don't keep the date in original format, we will have to reformat it back
 		 element_d.original = date_today;
 		 
-		 // Set the date as date_today
+		 // totalm maynot be a multiple of 5, then no option will be selected in the select-mins
+		 if (totalm % 5 !== 0) {
+			 var r = totalm % 5;
+			 element_m.value = totalm - r;
+		 }
+		 
+		 
 		 
 	 }); // end of edit-button on-click
 	
@@ -413,6 +421,7 @@ window.onload = function() {
 	  // When commit button is clicked
 	  commit_button.on('click', function() {
 		  // Read the totalh and totalm from the dropdown
+		  // Remember these are strings
 		  var h = document.getElementById('sel-hour').value;
 		  var m = document.getElementById('sel-mins').value;
 		  var d = document.getElementById('datepicker').original;
@@ -436,8 +445,10 @@ window.onload = function() {
 		  }
 		  // If same day, update the total
 		  else {
-			  totalh = h;
-			  totalm = m;
+			  totalh = parseInt(h, 10);
+			  totalm = parseInt(m, 10);
+			  // Change the display of total
+			  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 		  }
 		  //console.log(params);
 		  xhr.open('POST', params);
