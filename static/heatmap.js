@@ -278,7 +278,8 @@ window.onload = function() {
 		  
 		  // Only commit if valid work
 		  else {
-		  // Ajax Post request for PAUSE
+		      // Ajax Post request for PAUSE
+			  // We immediately write to the datastore when paused
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
 		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
@@ -295,9 +296,7 @@ window.onload = function() {
 						  // Set the commit button as Done! (and fade it - optional)
 						  // commit_button.text('Done!');
 						  // commit_button.attr('disabled', 'disabled');
-						  
-						  
-						  
+						
 					  }
 					  else 
 						  started_div.style('color', 'red').text('Server Error!');
@@ -314,42 +313,6 @@ window.onload = function() {
 		  
 		  // Show the edit total streak option
 		  d3.select('#total-edit-button').classed('disabled', false);
-		  			//.attr('class', null);
-		  
-		  // When commit button is clicked
-		  commit_button.on('click', function() {
-			  
-			  // We can change the editview to viewland once edit is committed
-		  	  d3.select('#area-editland').classed('disabled', true);
-		  	  d3.select('#area-viewland').classed('disabled', false);
-			  started_div.text('Click to Start');
-			  
-			  // Ajax Post request
-			  var xhr = new XMLHttpRequest();
-			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
-		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
-		  	  //console.log(params);
-			  xhr.open('POST', params);
-			  xhr.send();
-			  xhr.onreadystatechange = function () {
-					var DONE = 4; // readyState 4 means the request is done.
-					var OK = 200; // status 200 is a successful return.
-					if (xhr.readyState === DONE) {
-					  if (xhr.status === OK) {
-						  // var response = JSON.parse(xhr.responseText); // no response from server
-						  // Set the commit button as Done! (and fade it - optional)
-						  // commit_button.text('Done!');
-						  //commit_button.attr('disabled', 'disabled');
-						  
-						  
-					  }
-					  else 
-						  started_div.style('color', 'red').text('Server Error! Please Retry');
-
-					}
-			  };	  
-
-		  }); // end of commit button submit				  
 		  
 	  } 
 		
@@ -424,8 +387,8 @@ window.onload = function() {
      }); // end of ic_play on click
 	
 	 
+	 // Edit button event handler
 	 // This need not be inside the paused event handler
-	 // Even commit-button need not be inside it
 	 d3.select('#total-edit-button').on('click', function() {
 		 // Just disable area-viewland
 		 d3.select('#area-viewland').classed('disabled', true);
@@ -433,6 +396,41 @@ window.onload = function() {
 		 d3.select('#area-editland').classed('disabled', false);
 	 }); // end of edit-button on-click
 	
+	  
+	  // When commit button is clicked
+	  commit_button.on('click', function() {
+
+		  // We can change the editview to viewland once edit is submitted
+		  d3.select('#area-editland').classed('disabled', true);
+		  d3.select('#area-viewland').classed('disabled', false);
+		  started_div.text('Click to Start');
+
+		  // Ajax Post request
+		  var xhr = new XMLHttpRequest();
+		  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
+		  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  //console.log(params);
+		  xhr.open('POST', params);
+		  xhr.send();
+		  xhr.onreadystatechange = function () {
+				var DONE = 4; // readyState 4 means the request is done.
+				var OK = 200; // status 200 is a successful return.
+				if (xhr.readyState === DONE) {
+				  if (xhr.status === OK) {
+					  // var response = JSON.parse(xhr.responseText); // no response from server
+					  // Set the commit button as Done! (and fade it - optional)
+					  // commit_button.text('Done!');
+					  //commit_button.attr('disabled', 'disabled');
+
+
+				  }
+				  else 
+					  started_div.style('color', 'red').text('Server Error! Please Retry');
+
+				}
+		  };	  
+
+	  }); // end of commit button submit	
 	
 
 	  // First rendering of the calendar heatmap
