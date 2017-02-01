@@ -33,7 +33,7 @@ window.onload = function() {
     var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
-	var timer_set_interval = 10; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	var timer_set_interval = 20; // should be set to 60 for 1 minute. Set to 1 for testing purposes
 	var now = moment(); // now will be upto date if timer is running, otherwise not
 	var date_today = now.toJSON().substr(0,10); //2017-01-13 
 	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
@@ -402,6 +402,8 @@ window.onload = function() {
 		 element_h.value = totalh;
 		 element_m.value = totalm;
 		 element_d.value = format_date(date_today);
+		 // If we don't keep the date in original format, we will have to reformat it back
+		 element_d.original = date_today;
 		 
 		 // Set the date as date_today
 		 
@@ -413,6 +415,8 @@ window.onload = function() {
 		  // Read the totalh and totalm from the dropdown
 		  var h = document.getElementById('sel-hour').value;
 		  var m = document.getElementById('sel-mins').value;
+		  var d = document.getElementById('datepicker').original;
+
 		  // change the editview to viewland once edit is submitted
 		  d3.select('#area-editland').classed('disabled', true);
 		  d3.select('#area-viewland').classed('disabled', false);
@@ -426,6 +430,15 @@ window.onload = function() {
 		  var xhr = new XMLHttpRequest();
 		  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
 		  var params = '/?date='+date_today+'&active='+0+'&totalh='+h+'&totalm='+m+'&starth='+0+'&startm='+0;
+		  // If date is someday back, use the handler /ajax as we shouldn't change the Work today
+		  if (d !== date_today) {
+			  params = '/ajax?date='+d+'&active='+0+'&totalh='+h+'&totalm='+m+'&starth='+0+'&startm='+0;
+		  }
+		  // If same day, update the total
+		  else {
+			  totalh = h;
+			  totalm = m;
+		  }
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
@@ -457,6 +470,7 @@ window.onload = function() {
 		    maxDate: new Date(),
 		    onSelect: function() {
 				var dp = document.getElementById('datepicker');
+				dp.original = dp.value;
 				dp.value = format_date(dp.value);
 			}
 	  });
