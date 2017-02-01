@@ -32,7 +32,7 @@ window.onload = function() {
     var startm = 0;
 	
 	var timer_id = 0; // for cancelling the setInterval
-	var timer_set_interval = 20; // should be set to 60 for 1 minute. Set to 1 for testing purposes
+	var timer_set_interval = 60; // should be set to 60 for 1 minute. Set to 1 for testing purposes
 	var now = moment(); // now will be upto date if timer is running, otherwise not
 	var date_today = now.toJSON().substr(0,10); //2017-01-13 
 	var date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
@@ -51,15 +51,15 @@ window.onload = function() {
 	
 	
 	// This is timer running only for Testing
-	// Simulate a clock outsid
-	d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
+	// Simulate a clock outside
+	/* d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
 	setInterval(function(){
 		  //now = moment();				  
 		  now = now.add(1, 'hour');
 	      // Code for Testing purposes		
 		  d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
 
-	}, 1000*timer_set_interval);
+	}, 1000*timer_set_interval); */
 	
 	
 	
@@ -67,7 +67,8 @@ window.onload = function() {
 	// shouldn't be repeated in playing state as well as reload of playing state
 	// called from display_divs_and_set_timer() function
 	function timer_ticked() {
-		//now = moment();
+		// comment now if testing so that we can use the gloabl now
+		now = moment();
 		date_today = now.toJSON().substr(0,10); //2017-01-13 
 		date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // can't say today.subtract(1,'day') as today is mutable
 		
@@ -236,7 +237,8 @@ window.onload = function() {
 	
 	ic_play.on('click', function() {
       //ic_play.toggleClass('active');
-	  //now = moment();
+	  // The following 3 lines are probably not super important as we update these in timer tick every minute
+	  now = moment();
 	  date_today = now.toJSON().substr(0,10); //2017-01-13 
 	  date_yesterday = now.clone().subtract(1, 'day').toJSON().substr(0,10); // now is mutable
 	
@@ -274,7 +276,6 @@ window.onload = function() {
 			  totalh = 0;
 			  totalm = 0;
 		  }
-		  
 		  // Only commit if valid work
 		  else {
 		      // Ajax Post request for PAUSE
