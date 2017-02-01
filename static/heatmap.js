@@ -19,13 +19,12 @@ window.onload = function() {
 	// momentjs toJSON gives Greewich date
 	moment.fn.toJSON = function() { return this.format(); }
 	// define toggleClass fn
-	d3.selection.prototype.toggleClass = function(className) {  
-      this.classed(className, !this.classed(className));
-      return this;
-	}
+	// d3.selection.prototype.toggleClass = function(className) {  
+    //   this.classed(className, !this.classed(className));
+    //   return this;
+	// }
 	// Activate the alerts d3-bootstrap
 	d3.selectAll("div.alert").call(bootstrap.alert());
-
 	
 	var totalh = 0; 
     var totalm = 0;
@@ -400,7 +399,6 @@ window.onload = function() {
 		 var element_m = document.getElementById('sel-mins');
 		 var element_d = document.getElementById('datepicker');
 		 element_h.value = totalh;
-		 console.log('totalh = '+totalh)
 		 element_m.value = totalm;
 		 // Set the date as date_today
 		 element_d.value = format_date(date_today);
