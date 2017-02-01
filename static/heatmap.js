@@ -229,9 +229,7 @@ window.onload = function() {
 			  
 		  }
 		  else 
-			  d3.select('#started-div')
-						.style('color', 'red')
-						.text('Server Error! Please Refresh Page');
+			  started_div.style('color', 'red').text('Server Error! Please Refresh Page');
 
 		}
 	  };	// End of Ajax GET request  
@@ -309,9 +307,10 @@ window.onload = function() {
 		  
 		  }
 		  
+		  // We are not changing the text inside the button as of now!
 		  // Show the commit button
-		  commit_button.text('Commit');
-		  commit_button.attr('disabled', null);
+		  //commit_button.text('Commit');
+		  // commit_button.attr('disabled', null);
 		  
 		  // Show the edit total streak option
 		  d3.select('#total-edit-button').classed('disabled', false);
@@ -319,6 +318,12 @@ window.onload = function() {
 		  
 		  // When commit button is clicked
 		  commit_button.on('click', function() {
+			  
+			  // We can change the editview to viewland once edit is committed
+		  	  d3.select('#area-editland').classed('disabled', true);
+		  	  d3.select('#area-viewland').classed('disabled', false);
+			  started_div.text('Click to Start');
+			  
 			  // Ajax Post request
 			  var xhr = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
@@ -326,7 +331,6 @@ window.onload = function() {
 		  	  //console.log(params);
 			  xhr.open('POST', params);
 			  xhr.send();
-
 			  xhr.onreadystatechange = function () {
 					var DONE = 4; // readyState 4 means the request is done.
 					var OK = 200; // status 200 is a successful return.
@@ -334,10 +338,9 @@ window.onload = function() {
 					  if (xhr.status === OK) {
 						  // var response = JSON.parse(xhr.responseText); // no response from server
 						  // Set the commit button as Done! (and fade it - optional)
-						  commit_button.text('Done!');
-						  commit_button.attr('disabled', 'disabled');
+						  // commit_button.text('Done!');
+						  //commit_button.attr('disabled', 'disabled');
 						  
-						  started_div.text('Click to Start');
 						  
 					  }
 					  else 
@@ -358,8 +361,10 @@ window.onload = function() {
 		  
 		  careless = false; // Once user starts playing, they are no more careless
 		  
-		  // hide the commit button
-		  commit_button.attr('disabled', 'disabled');
+		  // Make sure the editland is disabled when playing
+		  d3.select('#area-editland').classed('disabled', true);
+		  d3.select('#area-viewland').classed('disabled', false);
+		  
 		  
 		  // hide the edit total streak option
 		  d3.select('#total-edit-button').classed('disabled', true);
@@ -416,7 +421,18 @@ window.onload = function() {
 	  } // end of else
 		
       return false;
-     });
+     }); // end of ic_play on click
+	
+	 
+	 // This need not be inside the paused event handler
+	 // Even commit-button need not be inside it
+	 d3.select('#total-edit-button').on('click', function() {
+		 // Just disable area-viewland
+		 d3.select('#area-viewland').classed('disabled', true);
+		 // enable the area-editland
+		 d3.select('#area-editland').classed('disabled', false);
+	 }); // end of edit-button on-click
+	
 	
 
 	  // First rendering of the calendar heatmap
