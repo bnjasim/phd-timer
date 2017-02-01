@@ -394,6 +394,12 @@ window.onload = function() {
 		 d3.select('#area-viewland').classed('disabled', true);
 		 // enable the area-editland
 		 d3.select('#area-editland').classed('disabled', false);
+		 
+		 // Need to set the totalh and totalm in the dropdown
+		 var element_h = document.getElementById('sel-hour');
+		 var element_m = document.getElementById('sel-mins');
+		 element_h.value = totalh;
+		 element_m.value = totalm;
 	 }); // end of edit-button on-click
 	
 	  
