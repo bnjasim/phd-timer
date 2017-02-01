@@ -405,16 +405,22 @@ window.onload = function() {
 	  
 	  // When commit button is clicked
 	  commit_button.on('click', function() {
-
-		  // We can change the editview to viewland once edit is submitted
+		  // Read the totalh and totalm from the dropdown
+		  var h = document.getElementById('sel-hour').value;
+		  var m = document.getElementById('sel-mins').value;
+		  // change the editview to viewland once edit is submitted
 		  d3.select('#area-editland').classed('disabled', true);
 		  d3.select('#area-viewland').classed('disabled', false);
 		  started_div.text('Click to Start');
 
+		  // Need to check the date for the appropriate type of write
+		  // If yesterday or someday before we have to use the handler /ajax
+		  // If not today don't change the totalh and totalm as well
+		  
 		  // Ajax Post request
 		  var xhr = new XMLHttpRequest();
 		  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
-		  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
+		  var params = '/?date='+date_today+'&active='+0+'&totalh='+h+'&totalm='+m+'&starth='+0+'&startm='+0;
 		  //console.log(params);
 		  xhr.open('POST', params);
 		  xhr.send();
