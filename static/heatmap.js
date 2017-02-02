@@ -5,16 +5,9 @@
 window.onload = function() {
 	
 	// TODO
-	// 1. On page reload, and the last time timer was running, and it was started some day back, what to do?
-	//    - Discard if continuous work is > 23h. 
-	// 2. Edit button action: textarea for changing h & m. Also Date picker. Error if totalh > 23h or < 0h in a day 
-	// 3. Add Notes
-	// 4. When paused/stopped, check if date crosses two days, then if submit make two commits. Otherwise user can edit 
-	//    If manually editing, give instruction that you have to make two separate submits. default date to yesterday if manually edit.
-	// 5. When paused datastore write to Entry also
-	// 6. 
-	// 7. Server Error handling: If clicked on play, the icon changes. But if server error, reset the icon as well as the variables
-	// 8. The HeatMap
+	// 1. Add Notes - May be later
+	// 2. Alert on Server Error 
+	// 3. The HeatMap
 	
 	// momentjs toJSON gives Greewich date
 	moment.fn.toJSON = function() { return this.format(); }
@@ -23,8 +16,6 @@ window.onload = function() {
     //   this.classed(className, !this.classed(className));
     //   return this;
 	// }
-	// Activate the alerts d3-bootstrap
-	d3.selectAll("div.alert").call(bootstrap.alert());
 	
 	var totalh = 0; 
     var totalm = 0;
@@ -41,6 +32,7 @@ window.onload = function() {
 	var max_allowed_working_hours = 16; // You can't work more than 16 hours a day
 	var careless = false; // true means the timer is running for so long, but user is not working 
 	
+	var alert_bottom = d3.select('#alert-bottom');
 	var commit_button = d3.select('#commit-button');
 	var previous_div = d3.select('#prev-div')
 	var started_div = d3.select('#started-div');
@@ -296,6 +288,10 @@ window.onload = function() {
 						  // Set the commit button as Done! (and fade it - optional)
 						  // commit_button.text('Done!');
 						  // commit_button.attr('disabled', 'disabled');
+						  
+						  // Alert that the work is committed
+						  var message = 'Work of ' + totalh + 'h ' + totalm + 'm Committed Successfully!';
+						  show_alert.call(alert_bottom, message, "alert-success");
 						
 					  }
 					  else 
@@ -485,8 +481,11 @@ window.onload = function() {
 			}
 	  });
 
+	  // Activate the alerts d3-bootstrap
+	  // Basically we are setting the event listener for close
+	  d3.selectAll("div.alert").call(bootstrap.alert());
 	
-	
+	  
 	  // First rendering of the calendar heatmap
 	  var today_end = moment().endOf('day').toDate();
       var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
@@ -820,12 +819,13 @@ if (!Array.prototype.find) {
         .on("click", close);
     };
 
-    alert.close = function(selection) {
+	// Seems not required  
+    /* alert.close = function(selection) {
       selection.each(close);
-    };
+    }; */
 
-    function close() {
-	
+	// Basically remove in .in class to hide the alert box  
+    function close() {	
 	  // sel is the close button
       sel = d3.select(this);
 		
@@ -834,9 +834,7 @@ if (!Array.prototype.find) {
 
       target = sel.classed("alert") ? sel : d3.select(sel.node().parentNode);
 
-
       // TODO trigger?
-
       target.classed("in", false);
       if (target.classed("fade")) {
         // TODO prefixed events?
@@ -854,3 +852,20 @@ if (!Array.prototype.find) {
   // TODO automatic delegation of alert closing?
 
 })(this);
+
+
+// this refers to alert_bottom
+function show_alert(message, alert_type) {
+	// alert_type can be "alert-success", "alert-error" etc.
+	this.select('div').text(message);
+	var class_list = "alert fade " + alert_type;
+	// this.classed('in', true);
+	this.attr('class', class_list + " in");
+	
+	// Hide the alert automatically after 5s
+	var that = this;
+	setTimeout(function() {
+		// Remove .in class
+		that.attr('class', class_list);
+	}, 3000);
+}

@@ -94,6 +94,7 @@ body{
 }
 
 #alert-bottom {
+	font-size: 13px;
 	position: fixed;
 	bottom: 0;
 	margin-bottom: 0 !important;
