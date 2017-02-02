@@ -510,10 +510,13 @@ window.onload = function() {
 	  
 	
 	  // Retrieve 1 year worth of entry data
+	  var edate = moment().endOf('day').toJSON().substr(0,10);
+	  var sdate = moment().startOf('day').subtract(1, 'year').toJSON().substr(0,10);
+	  
 	  // Why this Ajax request inside onLoad? Because we access the #calendar-viz
 	  var xhr = new XMLHttpRequest();
-	  var params = '/data';
-	  xhr.open('POST', params);
+	  var params = '/data?sdate=' + sdate + '&edate=' + edate;
+	  xhr.open('GET', params);
 	  xhr.send();
 	  xhr.onreadystatechange = function () {
 			var DONE = 4; // readyState 4 means the request is done.
@@ -526,19 +529,20 @@ window.onload = function() {
 
 				  // var start_date = response.date;
 				  
-				  // First rendering of the calendar heatmap
-				  var today_end = moment().endOf('day').toDate();
-				  var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
-
+				  
+				  var today_end = moment().endOf('day').toDate(); // similar to new Date() 
+	  			  var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
+				  
 				  // Set up the data
 				  var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
 					// dateElement is similar to the object you get by new Date()
 					return {
-					  date: dateElement,
+					  date: dateElement,//.toJSON().substr(0,10),
 					  count: (dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
 					};
 				  });
-
+				  
+				  // First rendering of the calendar heatmap
 				  var heatmap = calendarHeatmap()
 								  .data(chartData)
 								  .selector('#calendar-viz')

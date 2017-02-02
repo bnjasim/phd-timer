@@ -226,8 +226,23 @@ class DataHandler(Handler):
 		else:
 			logout = users.create_logout_url('/')
 			user_ent_key = ndb.Key(Account, user.user_id())	
+			# both are strings 2017-01-19 
+			sdate = str(self.request.get('sdate'))
+			edate = str(self.request.get('edate'))
 
-						
+			t = datetime.date.today() # datetime.date(2017, 1, 10) 
+			ndb_sdate = t.replace(year = int(sdate[0:4]),
+								 month = int(sdate[5:7]),
+								 day = int(sdate[8:10]))
+			# t is immutable
+			ndb_edate = t.replace(year = int(edate[0:4]),
+								 month = int(edate[5:7]),
+								 day = int(edate[8:10]))
+
+			qry = Entry.query(ndb.AND(Entry.date >= ndb_sdate, Entry.date <= ndb_edate))
+			qry_result = qry.fetch()
+
+			self.response.out.write(json.dumps(qry_result))
 
 
 app = webapp2.WSGIApplication([
