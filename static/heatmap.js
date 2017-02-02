@@ -159,7 +159,7 @@ window.onload = function() {
 	var params = '/ajax';
 	xhr.open('GET', params);
 	xhr.send();
-	
+	// console.log('Sent work AJAX');
 	// Ajax Get request for initial timer data load
 	xhr.onreadystatechange = function () {
 		var DONE = 4; // readyState 4 means the request is done.
@@ -168,7 +168,7 @@ window.onload = function() {
 		  if (xhr.status === OK) {
 			  //console.log(xhr.responseText)
 			  var response = JSON.parse(xhr.responseText);
-			  
+		
 			  var start_date = response.date;
 			  // date_today = now.toJSON.substr(0,10); - not needed as they are already set. Look above
 			  // But if the start date is yesterday,
@@ -518,27 +518,38 @@ window.onload = function() {
 	  var params = '/data?sdate=' + sdate + '&edate=' + edate;
 	  xhr.open('GET', params);
 	  xhr.send();
+	  // console.log('Sent entry AJAX');
 	  xhr.onreadystatechange = function () {
 			var DONE = 4; // readyState 4 means the request is done.
 			var OK = 200; // status 200 is a successful return.
 			if (xhr.readyState === DONE) {
 			  if (xhr.status === OK) {
 				  // Successfully retrieved 1 year worth of data
-				  console.log(xhr.responseText)
+				  // response is a dictionary with keys as date strings
 				  var response = JSON.parse(xhr.responseText);
-
-				  // var start_date = response.date;
-				  
+				  data = response;
+				  // var start_date = response.date;  
 				  
 				  var today_end = moment().endOf('day').toDate(); // similar to new Date() 
 	  			  var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
 				  
 				  // Set up the data
 				  var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
+					// If date is not in the response from server, set count as 0
+					var count = 0;  
+					// directly taking dateElement toJSON subtracts 5:30 hours so date may be yesterday
+					//  console.log(new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toJSON());
+					var d = moment(dateElement).toJSON().substr(0,10);
+					
+					if (response[d]) {
+						// console.log(response[d].hours)
+						count = parseInt(response[d].hours, 10);
+					}
+					  
 					// dateElement is similar to the object you get by new Date()
 					return {
 					  date: dateElement,//.toJSON().substr(0,10),
-					  count: (dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
+					  count: count//(dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
 					};
 				  });
 				  

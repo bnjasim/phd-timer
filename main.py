@@ -242,7 +242,16 @@ class DataHandler(Handler):
 			qry = Entry.query(ndb.AND(Entry.date >= ndb_sdate, Entry.date <= ndb_edate))
 			qry_result = qry.fetch()
 
-			self.response.out.write(json.dumps(qry_result))
+			# we need to serialize the dates
+			response_data = {}
+			for entry in qry_result:
+				date = entry.date
+				date_str = str(date.year) + '-' + ('0'+str(date.month) if date.month < 10 else str(date.month)) + '-' + ('0'+str(date.day) if date.day < 10 else str(date.day))
+
+				temp = {"hours":entry.hours, "mins":entry.mins, "notes":entry.notes}
+				response_data[date_str] = temp
+
+			self.response.out.write(json.dumps(response_data))
 
 
 app = webapp2.WSGIApplication([
