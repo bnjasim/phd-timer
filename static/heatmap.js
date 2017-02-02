@@ -6,10 +6,10 @@ window.onload = function() {
 	
 	// TODO
 	// 1. Add Notes - May be later
-	// 2. Alert on Server Error 
-	// 3. The HeatMap
+	// 2. The HeatMap
 	
-	// momentjs toJSON gives Greewich date
+	// momentjs toJSON gives Greewich date, so change it to local
+	// Even the new Date().toJSON gives the 5:30 deducted time
 	moment.fn.toJSON = function() { return this.format(); }
 	// define toggleClass fn
 	// d3.selection.prototype.toggleClass = function(className) {  
@@ -504,28 +504,59 @@ window.onload = function() {
 	  });
 
 	  // Activate the alerts d3-bootstrap
-	  // Basically we are activating the event listener for close
+	  // Basically we are only activating the onclick event listener for close
 	  d3.selectAll("div.alert").call(bootstrap.alert());
 	
 	  
-	  // First rendering of the calendar heatmap
-	  var today_end = moment().endOf('day').toDate();
-      var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
-      var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
-        return {
-          date: dateElement,
-          count: (dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
-        };
-      });
-      var heatmap = calendarHeatmap()
-                      .data(chartData)
-                      .selector('#calendar-viz')
-                      .tooltipEnabled(true)
-                      .colorRange(['#eee', '#459b2a'])
-                      .onClick(function (data) {
-                        console.log('data', data);
-                      });
-      heatmap();  // render the chart
+	
+	  // Retrieve 1 year worth of entry data
+	  // Why this Ajax request inside onLoad? Because we access the #calendar-viz
+	  var xhr = new XMLHttpRequest();
+	  var params = '/data';
+	  xhr.open('POST', params);
+	  xhr.send();
+	  xhr.onreadystatechange = function () {
+			var DONE = 4; // readyState 4 means the request is done.
+			var OK = 200; // status 200 is a successful return.
+			if (xhr.readyState === DONE) {
+			  if (xhr.status === OK) {
+				  // Successfully retrieved 1 year worth of data
+				  console.log(xhr.responseText)
+				  var response = JSON.parse(xhr.responseText);
+
+				  // var start_date = response.date;
+				  
+				  // First rendering of the calendar heatmap
+				  var today_end = moment().endOf('day').toDate();
+				  var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
+
+				  // Set up the data
+				  var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
+					// dateElement is similar to the object you get by new Date()
+					return {
+					  date: dateElement,
+					  count: (dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
+					};
+				  });
+
+				  var heatmap = calendarHeatmap()
+								  .data(chartData)
+								  .selector('#calendar-viz')
+								  .tooltipEnabled(true)
+								  .colorRange(['#eee', '#459b2a'])
+								  .onClick(function (data) {
+									console.log('data', data);
+								  });
+				  heatmap();  // render the chart
+
+			  }
+			  else {
+				  
+			  }
+				
+			}
+	  };	// End of Ajax request for 1 year worth of entry data  
+	  
 
 } // End window.onload
 

@@ -94,7 +94,8 @@ class TimerHandler(Handler):
 				user_name = user.nickname(), 
 				logout_url = logout)	
 
-	# Only today's work & Entry write to the datastore
+	# Only for today's work & Entry to be written to the datastore
+	# For some previous day use /ajax handler as it shouldn't affect the Work
 	def post(self):
 		
 		user = users.get_current_user()
@@ -149,6 +150,7 @@ class TimerHandler(Handler):
 
 class AjaxHandler(Handler):
 	# page load get request
+	# Just reutrn the work not entries
 	def get(self):	
 		user = users.get_current_user()
 		if user is None: 
@@ -212,11 +214,25 @@ class AjaxHandler(Handler):
 				entry.mins = totalm
 
 			entry.put()
-					
+	
+
+class DataHandler(Handler):
+	# Return all entries for previous 1 year
+	def get(self):	
+		user = users.get_current_user()
+		if user is None: 
+			self.redirect(users.create_login_url('/login'))
+			
+		else:
+			logout = users.create_logout_url('/')
+			user_ent_key = ndb.Key(Account, user.user_id())	
+
+						
 
 
 app = webapp2.WSGIApplication([
     ('/', TimerHandler),
     ('/ajax', AjaxHandler),
+    ('/data', DataHandler),
     ('/login', RegisterUserHandler)
 ], debug=True)
