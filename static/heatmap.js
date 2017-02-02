@@ -94,12 +94,18 @@ window.onload = function() {
 					var OK = 200; // status 200 is a successful return.
 					if (xhr.readyState === DONE) {
 						if (xhr.status === OK) {
-							 
+							 // Timer ticking ticking leaped to the next day!
+							 // Alert that the work is committed
+						     var message = "Yesterday's Work of " + total_yh + "h " + total_ym + "m Committed Successfully!";
+						     show_alert.call(alert_bottom, message, "alert-success");
 
 
 						}
-						else 
-							started_div.style('color', 'red').text("Server Error - Yesterday's work was not committed!");
+						else {
+							// started_div.style('color', 'red').text("Server Error - Yesterday's work was not committed!");
+							var message = 'Work of Yesterday was NOT committed completely because of server error!';
+						    show_alert.call(alert_bottom, message, "alert-danger");
+						}
 
 					}
 				};
@@ -187,14 +193,18 @@ window.onload = function() {
 				  // Change icon to pause
 		  	  	  ic_play.attr('class', 'play active');					  
 			      // The crossing of dates will be taken cared in timer_ticked function
-			      display_divs_and_set_timer();			 
+			      display_divs_and_set_timer();		
+				  
+				  // Alert that the work is Continued
+				  var message = "Continued playing from the last start time";
+				  show_alert.call(alert_bottom, message, "alert-info");
 				 
 			  }
 			  
 			  // Paused
 			  else {
 				  // no need to change the play icon
-				  // But in case, the user clicks on the play button before initial ajax response, reest it.
+				  // But in case, the user clicks on the play button before initial ajax response, reset it.
 				  ic_play.attr('class', 'play');
 				  // It will be wise to stop any existing timers if running, like the play was clicked before initial ajax load
 				  clearInterval(timer_id);
@@ -220,8 +230,11 @@ window.onload = function() {
 			
 			  
 		  }
-		  else 
+		  else {
 			  started_div.style('color', 'red').text('Server Error! Please Refresh Page');
+			  var message = "Failed to load data";
+			  show_alert.call(alert_bottom, message, "alert-warning");
+		  }
 
 		}
 	  };	// End of Ajax GET request  
@@ -294,8 +307,12 @@ window.onload = function() {
 						  show_alert.call(alert_bottom, message, "alert-success");
 						
 					  }
-					  else 
-						  started_div.style('color', 'red').text('Server Error!');
+					  else {
+						  // started_div.style('color', 'red').text('Server Error!');
+						  // Alert that the commit failed
+						  var message = 'Last commit failed!';
+						  show_alert.call(alert_bottom, message, "alert-danger");
+					  }
 
 					}
 			  };	
@@ -457,11 +474,16 @@ window.onload = function() {
 					  // Set the commit button as Done! (and fade it - optional)
 					  // commit_button.text('Done!');
 					  //commit_button.attr('disabled', 'disabled');
+					  var message = "Work of " + h + 'h ' + m + 'm committed successfully!' ;
+				      show_alert.call(alert_bottom, message, "alert-success");
 
 
 				  }
-				  else 
-					  started_div.style('color', 'red').text('Server Error! Please Retry');
+				  else {
+					  // started_div.style('color', 'red').text('Server Error! Please Retry');
+					  var message = "Failed to commit the last edit";
+				  	  show_alert.call(alert_bottom, message, "alert-danger");
+				  }
 
 				}
 		  };	  
@@ -470,7 +492,7 @@ window.onload = function() {
 	
 
       // Enable the pikaday date picker	
-	  // Can't pick upto today, not future dates
+	  // Can pick upto today, not future dates
 	  var picker = new Pikaday({ 
 		  	field: document.getElementById('datepicker'),
 		    maxDate: new Date(),
@@ -482,7 +504,7 @@ window.onload = function() {
 	  });
 
 	  // Activate the alerts d3-bootstrap
-	  // Basically we are setting the event listener for close
+	  // Basically we are activating the event listener for close
 	  d3.selectAll("div.alert").call(bootstrap.alert());
 	
 	  
@@ -856,7 +878,7 @@ if (!Array.prototype.find) {
 
 // this refers to alert_bottom
 function show_alert(message, alert_type) {
-	// alert_type can be "alert-success", "alert-error" etc.
+	// alert_type can be "alert-success", "alert-danger" etc.
 	this.select('div').text(message);
 	var class_list = "alert fade " + alert_type;
 	// this.classed('in', true);
@@ -867,5 +889,5 @@ function show_alert(message, alert_type) {
 	setTimeout(function() {
 		// Remove .in class
 		that.attr('class', class_list);
-	}, 3000);
+	}, 5000);
 }
