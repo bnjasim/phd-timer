@@ -18,7 +18,7 @@ rect.day-cell:hover {
   padding: 5px 9px;
   color: #bbbbbb;
   font-size: 12px;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   border-radius: 3px;
   text-align: center;
 }
@@ -29,4 +29,8 @@ rect.day-cell:hover {
   box-sizing: initial;
   border: 1px solid rgba(200,200,200,0.9);
   padding-right: 10px !important;
+}
+
+#calendar-viz {
+  position: relative;
 }
