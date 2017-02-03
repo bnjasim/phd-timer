@@ -558,6 +558,7 @@ window.onload = function() {
 								  .data(chartData)
 								  .selector('#calendar-viz')
 								  .tooltipEnabled(true)
+				  				  // .legendEnabled(false)
 								  .colorRange(['#eee', '#459b2a'])
 								  .onClick(function (data) {
 									console.log('data', data);
@@ -566,7 +567,8 @@ window.onload = function() {
 
 			  }
 			  else {
-				  
+				  var message = "Failed to fetch the calendar heatmap data. Please Refresh the page";
+				  show_alert.call(alert_bottom, message, "alert-danger");
 			  }
 				
 			}
@@ -606,6 +608,7 @@ function format_date(date_string) {
 
 
 // calendar code
+// adapted from https://github.com/DKirwan/calendar-heatmap
 function calendarHeatmap() {
   // defaults
   var width = 720;
@@ -680,10 +683,15 @@ function calendarHeatmap() {
     var max = d3.max(chart.data(), function (d) { return d.count; }); // max data value
 
     // color range
-    var color = d3.scale.linear()
-      .range(chart.colorRange())
-      .domain([0, max]);
-
+    // var color = d3.scale.linear()
+    //   .range(chart.colorRange())
+    //   .domain([0, max]);
+	// a quantize scale split the domain into equal n parts where n is the number of elements in the range
+	var color = d3.scale.quantile()
+		  .domain([0, 3, 6, 9]) // domain will be split into 4 equal parts 0-3, 3-6, 6-9 and 9-12
+		  .range(['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#1e6823'])
+		  
+	
     var tooltip;
     var dayRects;
 
