@@ -693,10 +693,23 @@ function calendarHeatmap() {
     //   .range(chart.colorRange())
     //   .domain([0, max]);
 	// a quantize scale split the domain into equal n parts where n is the number of elements in the range
-	var color = d3.scale.quantile()
+	/* var color = d3.scale.quantile()
 		  .domain([0, 3, 6, 9]) // domain will be split into 4 equal parts 0-3, 3-6, 6-9 and 9-12
 		  .range(['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#1e6823'])
-		  
+	*/
+	  // TODO - convert this into a d3.scale.myScale() function
+	  var color = function(color) {
+		  if (color <= 0) 
+			  return '#eeeeee';
+		  if (color < 3)
+			  return '#d6e685';
+		  if (color < 6)
+			  return '#8cc665';
+		  if (color < 9)
+			  return '#44a340';
+		  else
+			  return '#1e6823';
+	  }
 	
     var tooltip;
     var dayRects;
@@ -756,7 +769,9 @@ function calendarHeatmap() {
 		  var step = max/4; // 3 is the step size
           colorRange.push(color(max - step * i - 0.1)); // max is 12 // -0.1 is used because color(3) != color(2.9)
         }
-
+		
+		var legend_offset = 16;
+		  
         var legendGroup = svg.append('g');
         legendGroup.selectAll('.calendar-heatmap-legend')
             .data(colorRange)
@@ -765,19 +780,19 @@ function calendarHeatmap() {
             .attr('class', 'calendar-heatmap-legend')
             .attr('width', SQUARE_LENGTH)
             .attr('height', SQUARE_LENGTH)
-            .attr('x', function (d, i) { return (width - legendWidth) + (i + 1) * 13; })
+            .attr('x', function (d, i) { return (width - legendWidth) + (i + 1) * 13 + legend_offset; })
             .attr('y', height + SQUARE_PADDING)
             .attr('fill', function (d) { return d; });
 
         legendGroup.append('text')
           .attr('class', 'calendar-heatmap-legend-text')
-          .attr('x', width - legendWidth - 13)
+          .attr('x', width - legendWidth - 13 + legend_offset)
           .attr('y', height + SQUARE_LENGTH)
           .text('Less');
 
         legendGroup.append('text')
           .attr('class', 'calendar-heatmap-legend-text')
-          .attr('x', (width - legendWidth + SQUARE_PADDING) + (colorRange.length + 1) * 13)
+          .attr('x', (width - legendWidth + SQUARE_PADDING) + (colorRange.length + 1) * 13 + legend_offset)
           .attr('y', height + SQUARE_LENGTH)
           .text('More');
       }
