@@ -17,7 +17,7 @@ window.onload = function() {
     //   return this;
 	// }
 	
-	chartData = [];
+	var chartData = [];
 	
 	var totalh = 0; 
     var totalm = 0;
@@ -472,9 +472,10 @@ window.onload = function() {
 	  commit_button.on('click', function() {
 		  // Read the totalh and totalm from the dropdown
 		  // Remember these are strings
-		  var h = document.getElementById('sel-hour').value;
-		  var m = document.getElementById('sel-mins').value;
-		  var d = document.getElementById('datepicker').original;
+		  var h = parseInt(document.getElementById('sel-hour').value, 10);
+		  var m = parseInt(document.getElementById('sel-mins').value, 10);
+		  // original is in toJSON().substr format while value is formatted as 1-Jan-2017
+		  var d = document.getElementById('datepicker').original; 
 
 		  // change the editview to viewland once edit is submitted
 		  d3.select('#area-editland').classed('disabled', true);
@@ -495,8 +496,8 @@ window.onload = function() {
 		  }
 		  // If same day, update the total
 		  else {
-			  totalh = parseInt(h, 10);
-			  totalm = parseInt(m, 10);
+			  totalh = h;
+			  totalm = m;
 			  // Change the display of total
 			  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 		  }
@@ -509,9 +510,44 @@ window.onload = function() {
 				if (xhr.readyState === DONE) {
 				  if (xhr.status === OK) {
 					  // var response = JSON.parse(xhr.responseText); // no response from server
-					  // Set the commit button as Done! (and fade it - optional)
-					  // commit_button.text('Done!');
-					  //commit_button.attr('disabled', 'disabled');
+					  // Re-render the calendar heatmap
+					  var edited_date = moment(d).toDate()
+					  // moment(d).toDate() seems dangerous to use, as its toJSON() gives yesterday
+					  // But it turns out that dateElement is in the format (00:00 +5:30GMT) same as the above.
+					  // Initially I thought of new Date(d) which gives 5:30 +5:30GMT
+					  var temp = {
+							  date: edited_date,
+							  count: h + m/60,
+							  hours: h,
+							  mins: m
+					  };
+					  
+					  // What if the first commit on today is an edit? We have to append temp to the chartData
+					  // BUT for the time being - not doing it! In stead expect user to refresh the page!
+					  
+					  // Change the chartData if edited date is there. Only the appropriate element needs to be changed.
+					  var index = chartData.length - 1; // looping backward is better as it's more likely to edit nearby dates
+					  for(var i=index; i>=0; i--) {
+					  	 var ele = chartData[i];
+						 if (ele.date.toString().substr(0,15) === edited_date.toString().substr(0,15)) {
+							 chartData[i] = temp;
+							 break;
+						 }
+					  }
+					 
+					  var heatmap = calendarHeatmap()
+							  .data(chartData)
+							  .selector('#calendar-viz')
+							  .tooltipEnabled(true)
+							  // .legendEnabled(false)
+							  // .colorRange(['#eee', '#459b2a'])
+							  .onClick(function (data) {
+								console.log('data', data);
+					  });
+					  // Re-render the calendar heatmap
+					  heatmap();
+					  
+					  
 					  var message = "Work of " + h + 'h ' + m + 'm committed successfully!' ;
 				      show_alert.call(alert_bottom, message, "alert-success");
 
@@ -541,7 +577,7 @@ window.onload = function() {
 			}
 	  });
 
-	  // Activate the alerts d3-bootstrap
+	  // Activate the alerts adapted from d3-bootstrap
 	  // Basically we are only activating the onclick event listener for close
 	  d3.selectAll("div.alert").call(bootstrap.alert());
 	
