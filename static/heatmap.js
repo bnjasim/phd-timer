@@ -537,19 +537,24 @@ window.onload = function() {
 				  var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
 					// If date is not in the response from server, set count as 0
 					var count = 0;  
-					// directly taking dateElement toJSON subtracts 5:30 hours so date may be yesterday
+					var hours = 0;
+					var mins = 0;
+					// directly taking dateElement toJSON subtracts 5:30 hours, so date may be yesterday
 					//  console.log(new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toJSON());
-					var d = moment(dateElement).toJSON().substr(0,10);
-					
+					var d = moment(dateElement).toJSON().substr(0,10);			
 					if (response[d]) {
 						// console.log(response[d].hours)
-						count = parseInt(response[d].hours, 10);
+						hours = parseInt(response[d].hours, 10);
+						mins = parseInt(response[d].mins, 10);
+						count = hours + mins/60; // 1h 30m is 1.5 count
 					}
 					  
 					// dateElement is similar to the object you get by new Date()
 					return {
 					  date: dateElement,//.toJSON().substr(0,10),
-					  count: count//(dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
+					  count: count,//(dateElement.getDay() !== 0 && dateElement.getDay() !== 6) ? Math.floor(Math.random() * 60) : Math.floor(Math.random() * 10)
+					  hours: hours,
+					  mins: mins
 					};
 				  });
 				  
@@ -559,7 +564,7 @@ window.onload = function() {
 								  .selector('#calendar-viz')
 								  .tooltipEnabled(true)
 				  				  // .legendEnabled(false)
-								  .colorRange(['#eee', '#459b2a'])
+								  // .colorRange(['#eee', '#459b2a'])
 								  .onClick(function (data) {
 									console.log('data', data);
 								  });
@@ -625,7 +630,7 @@ function calendarHeatmap() {
   var data = [];
   var colorRange = ['#D8E6E7', '#218380'];
   var tooltipEnabled = true;
-  var tooltipUnit = 'contribution';
+  var tooltipUnit = 'work'; //'contribution';
   var legendEnabled = true;
   var onClick = null;
   var weekStart = 0; //0 for Sunday, 1 for Monday
@@ -680,7 +685,7 @@ function calendarHeatmap() {
     var dateRange = d3.time.days(yearAgo, now); // generates an array of date objects within the specified range
     var monthRange = d3.time.months(moment(yearAgo).startOf('month').toDate(), now); // it ignores the first month if the 1st date is after the start of the month
     var firstDate = moment(dateRange[0]);
-    var max = d3.max(chart.data(), function (d) { return d.count; }); // max data value
+    // var max = d3.max(chart.data(), function (d) { return d.count; }); // max data value
 
     // color range
     // var color = d3.scale.linear()
@@ -777,6 +782,8 @@ function calendarHeatmap() {
       }
 
       dayRects.exit().remove();
+		
+	  // Setting up the Feb Mar Apr etc. Legends on the top of the calendar	
       var monthLabels = svg.selectAll('.month')
           .data(monthRange)
           .enter().append('text')
@@ -798,6 +805,7 @@ function calendarHeatmap() {
 
       days.forEach(function (day, index) {
         index = formatWeekday(index);
+		// Mon Wed Fri - not all days are displayed on the left legend
         if (index % 2) {
           svg.append('text')
             .attr('class', 'day-initial')
