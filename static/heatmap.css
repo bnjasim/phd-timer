@@ -2,7 +2,7 @@ text.month-name,
 text.calendar-heatmap-legend-text,
 text.day-initial {
   font-size: 10px;
-  fill: #aaaaaa;
+  fill: rgba(100,100,100, 0.85);
   font-family: Helvetica, arial, 'Open Sans', sans-serif
 }
 .day-cell {

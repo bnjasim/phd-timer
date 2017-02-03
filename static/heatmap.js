@@ -17,6 +17,8 @@ window.onload = function() {
     //   return this;
 	// }
 	
+	chartData = [];
+	
 	var totalh = 0; 
     var totalm = 0;
     var starth = 0; 
@@ -298,13 +300,49 @@ window.onload = function() {
 					if (xhr.readyState === DONE) {
 					  if (xhr.status === OK) {
 						  // var response = JSON.parse(xhr.responseText); // no response from server
-						  // Set the commit button as Done! (and fade it - optional)
-						  // commit_button.text('Done!');
-						  // commit_button.attr('disabled', 'disabled');
+						  var ugly = 0; // some unexplainable error in modifying the chartData
+						  // Re-render the calendar heatmap
+						  var temp = {
+								  date: now.toDate(),
+								  count: totalh + totalm/60,
+								  hours: totalh,
+								  mins: totalm
+						  };
 						  
-						  // Alert that the work is committed
-						  var message = 'Work of ' + totalh + 'h ' + totalm + 'm Committed Successfully!';
-						  show_alert.call(alert_bottom, message, "alert-success");
+						  // Change the chartData. Only last element needs to be checked
+						  var last_date = chartData[chartData.length-1].date.toString().substr(0,15); // "Fri Feb 03 2017"
+						  if (last_date === now.clone().toString().substr(0,15) ) {
+							  chartData[chartData.length-1] = temp;
+						  }
+						  // check if last element is yesterday, then append a new element
+						  else if (last_date === now.clone().subtract(1, 'day').toString().substr(0,15) ) {
+							  console.log('tomorrow')
+							  chartData.push(temp);
+						  }
+						  else { // something went ugly!
+								var message = 'Work of ' + totalh + 'h ' + totalm + 'm Committed Successfully! But Calendar Data is not updated correctly';
+						  		show_alert.call(alert_bottom, message, "alert-warning");  
+							  
+							    ugly = 1;
+						  }
+						  var heatmap = calendarHeatmap()
+								  .data(chartData)
+								  .selector('#calendar-viz')
+								  .tooltipEnabled(true)
+								  // .legendEnabled(false)
+								  // .colorRange(['#eee', '#459b2a'])
+								  .onClick(function (data) {
+									console.log('data', data);
+						  });
+						  // Re-render the calendar heatmap
+						  heatmap();
+						  
+						  
+						  // Alert that the work is committed only if alert is not shown already
+						  if (!ugly) {
+							  var message = 'Work of ' + totalh + 'h ' + totalm + 'm Committed Successfully!';
+							  show_alert.call(alert_bottom, message, "alert-success");
+						  }
 						
 					  }
 					  else {
@@ -534,7 +572,7 @@ window.onload = function() {
 	  			  var yearAgo = moment().startOf('day').subtract(1, 'year').toDate();
 				  
 				  // Set up the data
-				  var chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
+				  chartData = d3.time.days(yearAgo, today_end).map(function (dateElement) {
 					// If date is not in the response from server, set count as 0
 					var count = 0;  
 					var hours = 0;
@@ -560,14 +598,15 @@ window.onload = function() {
 				  
 				  // First rendering of the calendar heatmap
 				  var heatmap = calendarHeatmap()
-								  .data(chartData)
-								  .selector('#calendar-viz')
-								  .tooltipEnabled(true)
-				  				  // .legendEnabled(false)
-								  // .colorRange(['#eee', '#459b2a'])
-								  .onClick(function (data) {
-									console.log('data', data);
-								  });
+					  .data(chartData)
+					  .selector('#calendar-viz')
+					  .tooltipEnabled(true)
+					  // .legendEnabled(false)
+					  // .colorRange(['#eee', '#459b2a'])
+					  .onClick(function (data) {
+						console.log('data', data);
+					  });
+				  
 				  heatmap();  // render the chart
 
 			  }
