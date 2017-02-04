@@ -157,19 +157,19 @@ window.onload = function() {
 	
 	
 	// Send an AJAX GET request for the state of the timer
-	var xhr = new XMLHttpRequest();
+	var xhr1 = new XMLHttpRequest();
 	var params = '/ajax';
-	xhr.open('GET', params);
-	xhr.send();
+	xhr1.open('GET', params);
+	xhr1.send();
 	// console.log('Sent work AJAX');
 	// Ajax Get request for initial timer data load
-	xhr.onreadystatechange = function () {
+	xhr1.onreadystatechange = function () {
 		var DONE = 4; // readyState 4 means the request is done.
 		var OK = 200; // status 200 is a successful return.
-		if (xhr.readyState === DONE) {
-		  if (xhr.status === OK) {
+		if (xhr1.readyState === DONE) {
+		  if (xhr1.status === OK) {
 			  //console.log(xhr.responseText)
-			  var response = JSON.parse(xhr.responseText);
+			  var response = JSON.parse(xhr1.responseText);
 		
 			  var start_date = response.date;
 			  // date_today = now.toJSON.substr(0,10); - not needed as they are already set. Look above
@@ -227,7 +227,7 @@ window.onload = function() {
 				  
 				  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 				  
-				  date_div.text('Date: ' + format_date(date_today));
+				  date_div.text('Date: ' + format_date(start_date));
 			  }
 			
 			  
@@ -287,18 +287,18 @@ window.onload = function() {
 		  else {
 		      // Ajax Post request for PAUSE
 			  // We immediately write to the datastore when paused
-			  var xhr = new XMLHttpRequest();
+			  var xhr_pause = new XMLHttpRequest();
 			  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
 		  	  var params = '/?date='+date_today+'&active='+0+'&totalh='+totalh+'&totalm='+totalm+'&starth='+0+'&startm='+0;
 		  	  //console.log(params);
-			  xhr.open('POST', params);
-			  xhr.send();
+			  xhr_pause.open('POST', params);
+			  xhr_pause.send();
 
-			  xhr.onreadystatechange = function () {
+			  xhr_pause.onreadystatechange = function () {
 					var DONE = 4; // readyState 4 means the request is done.
 					var OK = 200; // status 200 is a successful return.
-					if (xhr.readyState === DONE) {
-					  if (xhr.status === OK) {
+					if (xhr_pause.readyState === DONE) {
+					  if (xhr_pause.status === OK) {
 						  // var response = JSON.parse(xhr.responseText); // no response from server
 						  var ugly = 0; // some unexplainable error in modifying the chartData
 						  // Re-render the calendar heatmap
@@ -403,18 +403,18 @@ window.onload = function() {
 		  display_divs_and_set_timer();
 
 		  // Ajax post request to set the start time and active status
-		  var xhr = new XMLHttpRequest();
+		  var xhr_play = new XMLHttpRequest();
 		  // we send total time as well which will be available when the page is loaded
 		  var params = '/?date='+date_today+'&active='+1+'&starth='+now.hour()+'&startm='+now.minute()+'&totalh='+totalh+'&totalm='+totalm;
 		  //console.log(params);
-		  xhr.open('POST', params);
-		  xhr.send();
+		  xhr_play.open('POST', params);
+		  xhr_play.send();
 		  
-		  xhr.onreadystatechange = function () {
+		  xhr_play.onreadystatechange = function () {
 				var DONE = 4; // readyState 4 means the request is done.
 				var OK = 200; // status 200 is a successful return.
-				if (xhr.readyState === DONE) {
-				  if (xhr.status === OK) {
+				if (xhr_play.readyState === DONE) {
+				  if (xhr_play.status === OK) {
 					  // No response from server for POST
 					  // console.log('success');
 					  // console.log(ic_play.classed('active'));
@@ -487,7 +487,7 @@ window.onload = function() {
 		  // If not today don't change the totalh and totalm as well
 		  
 		  // Ajax Post request
-		  var xhr = new XMLHttpRequest();
+		  var xhr_edit = new XMLHttpRequest();
 		  // We are stopping. Set start to 0 - not very important, but for symmetry with the other xhr
 		  var params = '/?date='+date_today+'&active='+0+'&totalh='+h+'&totalm='+m+'&starth='+0+'&startm='+0;
 		  // If date is someday back, use the handler /ajax as we shouldn't change the Work today
@@ -502,13 +502,13 @@ window.onload = function() {
 			  total_div.text('Total Today: ' + format_time_diff(totalh, totalm) );
 		  }
 		  //console.log(params);
-		  xhr.open('POST', params);
-		  xhr.send();
-		  xhr.onreadystatechange = function () {
+		  xhr_edit.open('POST', params);
+		  xhr_edit.send();
+		  xhr_edit.onreadystatechange = function () {
 				var DONE = 4; // readyState 4 means the request is done.
 				var OK = 200; // status 200 is a successful return.
-				if (xhr.readyState === DONE) {
-				  if (xhr.status === OK) {
+				if (xhr_edit.readyState === DONE) {
+				  if (xhr_edit.status === OK) {
 					  // var response = JSON.parse(xhr.responseText); // no response from server
 					  // Re-render the calendar heatmap
 					  var edited_date = moment(d).toDate()
@@ -588,19 +588,19 @@ window.onload = function() {
 	  var sdate = moment().startOf('day').subtract(1, 'year').toJSON().substr(0,10);
 	  
 	  // Why this Ajax request inside onLoad? Because we access the #calendar-viz
-	  var xhr = new XMLHttpRequest();
+	  var xhr_year = new XMLHttpRequest();
 	  var params = '/data?sdate=' + sdate + '&edate=' + edate;
-	  xhr.open('GET', params);
-	  xhr.send();
+	  xhr_year.open('GET', params);
+	  xhr_year.send();
 	  // console.log('Sent entry AJAX');
-	  xhr.onreadystatechange = function () {
+	  xhr_year.onreadystatechange = function () {
 			var DONE = 4; // readyState 4 means the request is done.
 			var OK = 200; // status 200 is a successful return.
-			if (xhr.readyState === DONE) {
-			  if (xhr.status === OK) {
+			if (xhr_year.readyState === DONE) {
+			  if (xhr_year.status === OK) {
 				  // Successfully retrieved 1 year worth of data
 				  // response is a dictionary with keys as date strings
-				  var response = JSON.parse(xhr.responseText);
+				  var response = JSON.parse(xhr_year.responseText);
 				  data = response;
 				  // var start_date = response.date;  
 				  
