@@ -6,7 +6,11 @@ window.onload = function() {
 	
 	// TODO
 	// 1. Add Notes - May be later
-	// 2. The HeatMap
+	// 2. Done! Current session in the beginning not showing anything as 0h 0m ==> nothing. At least show 0m in the beginning
+	// 3. Total work in the last year above the heatmap - on click a small button, only
+	// 4. at least 30m work to show pale yellow color in the heatmap
+	// 5. Done! Timer time to minimum 30s
+	// 6. When started playing, if ajax fails, show fixed warning that is not written. Fixed warning may be other cases also
 	
 	// momentjs toJSON gives Greewich date, so change it to local
 	// Even the new Date().toJSON gives the 5:30 deducted time
@@ -659,6 +663,10 @@ window.onload = function() {
 
 // 1h-45m should be formatted as 15m
 function format_time_diff(h, m) {
+	// to prevent empty return value
+	if (h+m === 0)
+		return '0m';
+	
 	if (m < 0) {
 		m += 60;
 		h -= 1;
@@ -773,14 +781,15 @@ function calendarHeatmap() {
 		  .range(['#eeeeee', '#d6e685', '#8cc665', '#44a340', '#1e6823'])
 	*/
 	  // TODO - convert this into a d3.scale.myScale() function
-	  var color = function(color) {
-		  if (color <= 0) 
+	  var color = function(c) {
+		  // minimum half an hour work to show pale yellow color
+		  if (c < 0.5) 
 			  return '#eeeeee';
-		  if (color < 3)
+		  if (c < 3)
 			  return '#d6e685';
-		  if (color < 6)
+		  if (c < 6)
 			  return '#8cc665';
-		  if (color < 9)
+		  if (c < 9)
 			  return '#44a340';
 		  else
 			  return '#1e6823';
@@ -1031,5 +1040,5 @@ function show_alert(message, alert_type) {
 	setTimeout(function() {
 		// Remove .in class
 		that.attr('class', class_list);
-	}, 5000);
+	}, 30000);
 }
