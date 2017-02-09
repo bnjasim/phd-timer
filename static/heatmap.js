@@ -8,10 +8,15 @@ window.onload = function() {
 	// 1. Add Notes - May be later
 	// 2. Done! Current session in the beginning not showing anything as 0h 0m ==> nothing. At least show 0m in the beginning
 	// 3. Total work in the last year above the heatmap - on click a small button, only
-	// 4. at least 30m work to show pale yellow color in the heatmap
+	// 4. Done! at least 30m work to show pale yellow color in the heatmap
 	// 5. Done! Timer time to minimum 30s
-	// 6. When started playing, if ajax fails, show fixed warning that is not written. Fixed warning may be other cases also
-	
+	// 6. Done! Persist alert-danger
+	// 7. Done! - No red color any more! Red color after play errror don't go away even when started again - create a class 
+	// 8. Very Important! - while editing, if a date is chosen, automatically load that day's hour and mins to help in editing
+	// 9. Dropped! Use local instead - Allow start playing without connecting to the internet by showing a warning! Right now it's not possible
+	// 10. Bug: while crossing 12 '0' clock, start time not changed!
+	// 11. Bug: Edit: 00 is not set in hour, rather empty in hour dropdown as default
+	// 12. Bug: look at this bug - edit submit also updated the heatmap!!! also the tooltip won't go away!
 	// momentjs toJSON gives Greewich date, so change it to local
 	// Even the new Date().toJSON gives the 5:30 deducted time
 	moment.fn.toJSON = function() { return this.format(); }
@@ -58,8 +63,6 @@ window.onload = function() {
 		  d3.select('#current-time').text('Current Time: '+ now.hour() +'h'+now.minute()+'m' );
 
 	}, 1000*timer_set_interval); */
-	
-	
 	
 	
 	// shouldn't be repeated in playing state as well as reload of playing state
@@ -109,7 +112,7 @@ window.onload = function() {
 						}
 						else {
 							// started_div.style('color', 'red').text("Server Error - Yesterday's work was not committed!");
-							var message = 'Work of Yesterday was NOT committed completely because of server error!';
+							var message = "Yesterday's Work of " + total_yh + "h " + total_ym + "m was NOT committed because of server error!';
 						    show_alert.call(alert_bottom, message, "alert-danger");
 						}
 
@@ -237,8 +240,8 @@ window.onload = function() {
 			  
 		  }
 		  else {
-			  started_div.style('color', 'red').text('Server Error! Please Refresh Page');
-			  var message = "Failed to load data";
+			  started_div.text('Server Error! Please Refresh Page before playing');
+			  var message = "Failed to load data. Refresh to avoid loss of today's work";
 			  show_alert.call(alert_bottom, message, "alert-warning");
 		  }
 
@@ -425,7 +428,7 @@ window.onload = function() {
 					  
 				  }
 				  else {
-					d3.select('#started-div').style('color', 'red').text('Server Error! Please Retry');
+					d3.select('#started-div').text('Server Error! Please Retry');
 					  
 					// Reset to paused state
 					//ic_play.attr('class', 'play');
@@ -1035,10 +1038,15 @@ function show_alert(message, alert_type) {
 	// this.classed('in', true);
 	this.attr('class', class_list + " in");
 	
-	// Hide the alert automatically after 5s
+	// Hide the alert automatically after 30s
+	// But if alert type is danger, persist it infinitely
+	var duration = 30000;
+	if (alert_type === 'alert_danger') {
+		duration = 1000 * 60 * 60 * 10; // 10 hours
+	}
 	var that = this;
 	setTimeout(function() {
 		// Remove .in class
 		that.attr('class', class_list);
-	}, 30000);
+	}, duration);
 }
