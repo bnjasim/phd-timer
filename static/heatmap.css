@@ -103,6 +103,9 @@ body{
   min-height: 30px;
 }
 
+.hidden {
+  visibility: hidden;
+}
 
 .disabled {
   /*pointer-events: none;

@@ -26,6 +26,8 @@ window.onload = function() {
     //   return this;
 	// }
 	
+	// chartData is created out of the ajax response
+	// It has dateElement, hours, mins and count which is h+m/60
 	var chartData = [];
 	
 	var totalh = 0; 
@@ -596,7 +598,7 @@ window.onload = function() {
 	  d3.selectAll("div.alert").call(bootstrap.alert());
 	
 	  
-	
+	  // This is also initial Ajax data load - load entries
 	  // Retrieve 1 year worth of entry data
 	  var edate = moment().endOf('day').toJSON().substr(0,10);
 	  var sdate = moment().startOf('day').subtract(1, 'year').toJSON().substr(0,10);
@@ -668,6 +670,29 @@ window.onload = function() {
 			}
 	  };	// End of Ajax request for 1 year worth of entry data  
 	  
+	
+	  // Show total of last year upon click
+	  d3.select('#year-total-button').on('click', function() {
+		  console.log('clicked')
+		// Compute total in the chartData
+		var totalCount = 0;
+		for (var i=0; i<chartData.length; i++) {
+			totalCount += chartData[i].count;
+		}
+		  
+		var hours = Math.floor(totalCount);
+		var mins = Math.round((totalCount - hours) * 60);
+		var text = "Total " + hours + "h " + mins + "m in the chart";
+		  
+		var s = d3.select('#year-total').select('span');
+		s.text(text);
+		s.classed('hidden', false);
+		// After 5s hide it
+		setTimeout(function(){
+			s.classed('hidden', true);
+		}, 5000);
+		
+	  });
 
 } // End window.onload
 
