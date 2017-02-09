@@ -12,11 +12,11 @@ window.onload = function() {
 	// 5. Done! Timer time to minimum 30s
 	// 6. Done! Persist alert-danger
 	// 7. Done! - No red color any more! Red color after play errror don't go away even when started again - create a class 
-	// 8. Very Important! - while editing, if a date is chosen, automatically load that day's hour and mins to help in editing
-	// 9. Dropped! Use local instead - Allow start playing without connecting to the internet by showing a warning! Right now it's not possible
-	// 10. Bug: while crossing 12 '0' clock, start time not changed!
-	// 11. Bug: Edit: 00 is not set in hour, rather empty in hour dropdown as default
-	// 12. Bug: look at this bug - edit submit also updated the heatmap!!! also the tooltip won't go away!
+	// 8. Dropped! - while editing, if a date is chosen, automatically load that day's hour and mins to help in editing
+	// 9. Dropped! Allow start playing without connecting to the internet by showing a warning! Right now it's not possible
+	// 10. Not a bug. Net was not connected. Bug: while crossing 12 '0' clock, start time not changed!
+	// 11. Not sure: Bug: Edit: 00 is not set in hour, rather empty in hour dropdown as default
+	// 
 	// momentjs toJSON gives Greewich date, so change it to local
 	// Even the new Date().toJSON gives the 5:30 deducted time
 	moment.fn.toJSON = function() { return this.format(); }
@@ -82,6 +82,12 @@ window.onload = function() {
 			if (total_ym < 0) {
 				total_yh -= 1;
 				total_ym += 60;
+				
+				if(total_yh<0) {
+					total_yh = 0;
+					var message = "Unexpeted Error! Total Time became negative!!!";
+					show_alert.call(alert_bottom, message, "alert-warning");
+				}
 			}
 			
 			// If the timer has been running for more than 16h? Simply ignore it!
@@ -112,7 +118,7 @@ window.onload = function() {
 						}
 						else {
 							// started_div.style('color', 'red').text("Server Error - Yesterday's work was not committed!");
-							var message = "Yesterday's Work of " + total_yh + "h " + total_ym + "m was NOT committed because of server error!';
+							var message = "Yesterday's Work of " + total_yh + "h " + total_ym + "m was NOT committed because of server error!";
 						    show_alert.call(alert_bottom, message, "alert-danger");
 						}
 
@@ -179,6 +185,7 @@ window.onload = function() {
 			  var response = JSON.parse(xhr1.responseText);
 		
 			  var start_date = response.date;
+			  // console.log(response)
 			  // date_today = now.toJSON.substr(0,10); - not needed as they are already set. Look above
 			  // But if the start date is yesterday,
 			  // If it has been playing, cut it off till 24.00, commit it and start playing from 00AM
